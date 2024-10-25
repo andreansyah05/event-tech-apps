@@ -19,11 +19,11 @@ datasource db {
 model Users{
   user_id Int @id @default(autoincrement())
   userReferralId Int
-  referral_use Int // Value --> default null apabila dia tidak menggunakan referral code orang lain
+  referral_use Int? // Value --> default null apabila dia tidak menggunakan referral code orang lain
   name String
-  email String
-  password String
-  points Float
+  email String @unique
+  password String 
+  points Float @default(0)
   user_role String
   transaction Transaction[]
   created_at DateTime @default(now())
@@ -36,7 +36,7 @@ model Users{
 }
 
 model User_Referral{
-  user_referral_id Int @id @default(autoincrement())
+  user_referral_id Int @id 
   limit_use Int @default(3)
   total_use Int
   
