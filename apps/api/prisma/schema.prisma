@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+    previewFeatures = ["multiSchema"]
+
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas = ["techevent"]
+}
+
+model Users{
+  user_id Int @id @default(autoincrement())
+  userReferralId Int
+  referral_use Int // Value --> default null apabila dia tidak menggunakan referral code orang lain
+  name String
+  email String
+  password String
+  points Float
+  user_role String
+  transaction Transaction[]
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  // CREATE RELATION TO FOREIGN KEY
+  user_referral User_Referral @relation(fields: [userReferralId],references: [user_referral_id])
+  @@schema("techevent")
+  Review Review[]
+}
+
+model User_Referral{
+  user_referral_id Int @id @default(autoincrement())
+  limit_use Int @default(3)
+  total_use Int
+  
+  Users Users[]
+  @@schema("techevent")
+}
+
+model Transaction{
+  transaction_id Int @id @default(autoincrement())
+  userId Int
+  eventId Int
+  order_date DateTime @default(now())
+  status_order String
+  payment_ammount Float
+  payment_method String
+  is_Discount Boolean
+  is_UsePoint Boolean
+
+  // CREATE RELATION TO FOREIGN KEY
+  Users Users @relation(fields: [userId], references: [user_id])
+  Event Event @relation(fields: [eventId], references: [event_id])
+  @@schema("techevent")
+}
+
+model Event{
+  event_id Int @id @default(autoincrement())
+  event_name String
+  event_image String
+  event_description String
+  event_price Float
+  event_location String
+  event_capacity Int
+  categoryId Int
+  event_start_date DateTime
+  event_end_date DateTime
+  discounted_price Float
+  is_online Boolean // Check apakah event ini online atau offline
+  is_paid Boolean // Check apakah event ini bayar atau gratis
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+
+  Transaction Transaction[]
+  Review Review[]
+  Dicount_Event Dicount_Event[]
+  // CREATE RELATION TO FOREIGN KEY
+
+  Category Category_Event @relation(fields: [categoryId],references: [category_id])
+  @@schema("techevent")
+}
+
+model Category_Event{
+  category_id Int @id @default(autoincrement())
+  category_name String
+  event Event[]
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  @@schema("techevent")
+}
+
+model Review{
+  review_id Int @id @default(autoincrement())
+  userId Int
+  eventId Int
+  review_content String
+  review_rating Int
+  created_at DateTime @default(now())
+
+  User Users @relation(fields: [userId],references: [user_id])
+  Event Event @relation(fields: [eventId], references: [event_id])
+
+  @@schema("techevent")
+}
+
+model Dicount_Event{
+  discount_id Int @id @default(autoincrement())
+  eventId Int
+  discount_percentage Float
+  is_active Boolean
+  end_date DateTime
+
+  Event Event @relation(fields: [eventId], references: [event_id])
+  @@schema("techevent")
+}
+
