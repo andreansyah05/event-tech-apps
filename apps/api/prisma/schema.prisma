@@ -18,25 +18,27 @@ datasource db {
 
 model Users{
   user_id Int @id @default(autoincrement())
-  userReferralId Int
-  referral_use Int? // Value --> default null apabila dia tidak menggunakan referral code orang lain
+  userReferralId Int @unique
+  referral_use String? // Value --> default null apabila dia tidak menggunakan referral code orang lain
   name String
   email String @unique
   password String 
   points Float @default(0)
   user_role String
   transaction Transaction[]
+  refresh_token String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
   // CREATE RELATION TO FOREIGN KEY
   user_referral User_Referral @relation(fields: [userReferralId],references: [user_referral_id])
-  @@schema("techevent")
   Review Review[]
+  @@schema("techevent")
 }
 
 model User_Referral{
-  user_referral_id Int @id 
+  user_referral_id Int @id @default(autoincrement())
+  referral_code String @unique
   limit_use Int @default(3)
   total_use Int
   

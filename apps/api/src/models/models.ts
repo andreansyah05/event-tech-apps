@@ -1,5 +1,5 @@
 export interface Event {
-    
+
   event_name: string;          // Nama acara
   event_image: string;         // URL gambar acara
   event_description: string;    // Deskripsi acara
@@ -14,3 +14,17 @@ export interface Event {
   is_paid: boolean;            // Apakah acara ini bayar atau gratis
 
 }
+
+export interface Discount {
+    
+    eventId: number;             // ID acara yang terkait
+    discount_percentage: number;  // Persentase diskon
+    is_active: boolean;          // Status aktif diskon
+    end_date: Date;              // Tanggal berakhir diskon
+  }
+
+  export interface Category {
+    
+    category_name: string;       // Nama kategori
+    category_description: string; // Deskripsi kategori
+  }
