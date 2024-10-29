@@ -10,7 +10,7 @@ import userRouter from "./routers/user.routers/user.router";
 environment.config();
 
 const app = express();
-const PORT = process.env.DEV_SERVER_PORT;
+const PORT = process.env.SERVER_PORT_DEV;
 
 app.use(express.json());
 app.use(
