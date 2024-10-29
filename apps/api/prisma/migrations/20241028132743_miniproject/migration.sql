@@ -5,11 +5,11 @@ CREATE SCHEMA IF NOT EXISTS "techevent";
 CREATE TABLE "techevent"."Users" (
     "user_id" SERIAL NOT NULL,
     "userReferralId" INTEGER NOT NULL,
-    "referral_use" INTEGER NOT NULL,
+    "referral_use" INTEGER,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "points" DOUBLE PRECISION NOT NULL,
+    "points" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "user_role" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -19,7 +19,7 @@ CREATE TABLE "techevent"."Users" (
 
 -- CreateTable
 CREATE TABLE "techevent"."User_Referral" (
-    "user_referral_id" SERIAL NOT NULL,
+    "user_referral_id" INTEGER NOT NULL,
     "limit_use" INTEGER NOT NULL DEFAULT 3,
     "total_use" INTEGER NOT NULL,
 
@@ -94,6 +94,9 @@ CREATE TABLE "techevent"."Dicount_Event" (
 
     CONSTRAINT "Dicount_Event_pkey" PRIMARY KEY ("discount_id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Users_email_key" ON "techevent"."Users"("email");
 
 -- AddForeignKey
 ALTER TABLE "techevent"."Users" ADD CONSTRAINT "Users_userReferralId_fkey" FOREIGN KEY ("userReferralId") REFERENCES "techevent"."User_Referral"("user_referral_id") ON DELETE RESTRICT ON UPDATE CASCADE;
