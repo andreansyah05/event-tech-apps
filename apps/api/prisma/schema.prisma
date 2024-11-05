@@ -109,5 +109,8 @@ model Dicount_Event {
   is_active                              Boolean
   end_date                               DateTime
   event         Event[]
+
+
+
   @@schema("techevent")
 }

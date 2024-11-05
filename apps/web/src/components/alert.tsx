@@ -37,4 +37,4 @@ function Toast({ type, showToast, highlightText, text }: Toast) {
   }
 }
 
-export default Toast;
+export default Toast; // Mengekspor komponen Toast sebagai default
