@@ -12,13 +12,17 @@ router.post(
   authController.registerUser.bind(authController)
 );
 router.post("/login-user", authController.loginUser.bind(authController));
-router.put(
+router.get(
   "/update-token",
   authController.refreshAccessToken.bind(authController)
 );
 router.put(
   "/logout-user/:user_id",
   authController.logoutUser.bind(authController)
+);
+router.get(
+  "/validate-token",
+  authController.validateToken.bind(authController)
 );
 
 export default router;

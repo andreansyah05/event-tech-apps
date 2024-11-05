@@ -1,13 +1,24 @@
-import { LoginAuth } from "@/models/auth";
+import { LoginAuth } from "@/models/models";
 import React, { useState, useEffect } from "react";
-import { AuthHandler } from "@/pages/api/authValidation";
+import { useRouter } from "next/router";
+import { AuthHandler } from "@/utils/authValidation";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { useAuth } from "@/utils/userContext";
+import Cookies from "js-cookie";
+import { redirectIfLogin } from "@/utils/redirectIfLogin";
 
 function LoginPage() {
+  // Check if the user already login or not
+  redirectIfLogin();
+
+  const router = useRouter();
+  const { userLogin } = useAuth();
+
   const authHandler = new AuthHandler();
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(false); // Track data loading state
 
   // LOGIN STATE
   const [formData, setFormData] = useState<LoginAuth>({
@@ -30,14 +41,26 @@ function LoginPage() {
   };
 
   //   Handle Submit Button
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    authHandler.handleSubmitData(formData);
+    try {
+      setIsLoading(true);
+      const response = await authHandler.handleSubmitData(formData);
+      console.log("Respone Handle Submit : ", response);
+      if (response?.status === 200) {
+        console.log("status === 200");
+        userLogin(response.data.user);
+        router.push("/");
+      }
+    } catch (error) {
+      console.log("Something went wrong :", error);
+    }
   };
 
   useEffect(() => {
     setIsButtonDisabled(authHandler.handleLoginValidation(formData));
   }, [formData.email, formData.password]);
+
   return (
     <>
       <div className="p-4 md:flex md:h-screen md:justify-center md:items-center ">
@@ -53,7 +76,7 @@ function LoginPage() {
               <input
                 type="email"
                 id="email"
-                className="bg-zinc-100 hover:bg-zinc-200 transition-all	focus:border-red-500 text-gray-900 text-sm rounded-sm  block w-full p-3 "
+                className="bg-zinc-100 hover:bg-zinc-200 transition-all	 text-gray-900 text-sm rounded-sm  block w-full p-3 "
                 placeholder="Ex : youremail@example.com"
                 value={formData.email}
                 onChange={handleChangeEmail}
@@ -75,6 +98,9 @@ function LoginPage() {
               />
             </div>
             <Button
+              isLoading={isLoading}
+              isButton={true}
+              width="w-fit"
               type="primary"
               text="Login"
               isButtonDisable={isButtonDisabled}

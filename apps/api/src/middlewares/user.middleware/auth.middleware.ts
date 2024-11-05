@@ -16,8 +16,10 @@ export class AuthMiddleware {
     // Middleware will be use to check register input
     const { email, name, password, role }: AuthProps = req.body;
     if (!email || !name || !password || !role) {
+      console.log("Fields : ", req.body);
       res.status(400).send({
         status: res.statusCode,
+        code: "REQ",
         message: "All fields are required",
         field: {
           email: email || "",

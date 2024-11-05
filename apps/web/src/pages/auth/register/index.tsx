@@ -1,15 +1,26 @@
-import { RegisterForm } from "@/models/auth";
+import { RegisterForm } from "@/models/models";
 import React, { useState, useEffect } from "react";
-import { AuthHandler } from "@/pages/api/authValidation";
-import Toast from "@/components/alert";
+import { AuthHandler } from "@/utils/authValidation";
+import ToastAlert, { Toast } from "@/components/alert";
+
 import Button from "@/components/Button";
 import Link from "next/link";
+import { redirectIfLogin } from "@/utils/redirectIfLogin";
 
 function RegisterPage() {
+  // Check if the user already login or not
+  redirectIfLogin();
+
   const authHandler = new AuthHandler();
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [showToast, setShowToast] = useState<boolean>(false);
+  const [toast, setToast] = useState<Toast>({
+    highlightText: "",
+    text: "",
+    type: "FAILED",
+    showToast: false,
+  });
 
   // LOGIN STATE
   const [formData, setFormData] = useState<RegisterForm>({
@@ -46,14 +57,55 @@ function RegisterPage() {
   //   Handle Submit Button
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await authHandler.handleRegistrationUser(formData).then((response) => {
-      if (response?.status === 201) {
-        setShowToast(true);
-        setTimeout(() => {
-          window.location.href = "/auth/login";
-        }, 2000);
-      }
-    });
+    await authHandler
+      .handleRegistrationUser(formData)
+      .then((response) => {
+        if (response.status === 201) {
+          setToast({
+            highlightText: "redirect you to login page",
+            text: "User registered successfully",
+            type: "SUCCESS",
+            showToast: true,
+          });
+          setTimeout(() => {
+            window.location.href = "/auth/login";
+          }, 1200);
+        } else if (response.data.code === "AU") {
+          console.log(response.data.code);
+          // EMAIL ALREADY IN USED
+          setToast({
+            highlightText: "Email already in use",
+            text: "You can try login or use another email",
+            type: "FAILED",
+            showToast: true,
+          });
+          setTimeout(() => {
+            setToast({
+              ...toast,
+              showToast: false,
+            });
+          }, 1800);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.code === "REQ") {
+          console.log(error.data.code);
+          // ALL FIELDS ARE REQUIRED
+          setToast({
+            highlightText: "All field are required",
+            text: "Please input all the fields to register",
+            type: "FAILED",
+            showToast: true,
+          });
+          setTimeout(() => {
+            setToast({
+              ...toast,
+              showToast: false,
+            });
+          }, 1800);
+        }
+      });
   }
 
   useEffect(() => {
@@ -61,7 +113,15 @@ function RegisterPage() {
   }, [formData.email, formData.password, formData.name]);
   return (
     <>
-      <Toast showToast={showToast} />
+      <ToastAlert
+        type={toast.type}
+        highlightText={
+          toast.type === "SUCCESS" ? toast.highlightText : toast.text
+        }
+        text={toast.type === "SUCCESS" ? toast.highlightText : toast.text}
+        showToast={toast.showToast}
+      />
+
       <div className="p-4 md:flex md:h-screen md:justify-center md:items-center ">
         <div className="max-w-screen-sm mx-auto  p-5 border border-zinc-200 rounded bg-white md:p-10 ">
           <h1 className="font-bold text-2xl mb-9 md:text-3xl">
@@ -114,6 +174,8 @@ function RegisterPage() {
               </p>
             </div>
             <Button
+              isButton={true}
+              width="w-fit"
               type="primary"
               text="Register"
               isButtonDisable={isButtonDisabled}

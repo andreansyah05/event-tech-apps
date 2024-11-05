@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { AuthProps } from "../../models/user.interface";
+import { AuthProps, validateUserResponse } from "../../models/user.interface";
 import { ReferralService } from "./referral.service";
 import bcrypt from "bcryptjs";
 import { AuthUtils } from "../../utils/auth.utils";
@@ -24,7 +24,8 @@ export class AuthService {
       },
     });
     if (checkEmail) {
-      return { status: 400, message: "Email already registered" };
+      console.log(checkEmail);
+      return { code: "AU", status: 400, message: "Email already registered" };
     }
 
     // Hashing password
@@ -32,28 +33,31 @@ export class AuthService {
 
     // GENERATE and create referral
     //const referralResponse = await this.referralService.()
-    const referralResponse = await this.referralService.createUserReferral(
-      data.name
-    );
-    if (referralResponse) {
-      const response = await this.prisma.users.create({
-        data: {
-          name: data.name,
-          email: data.email,
-          userReferralId: referralResponse.user_referral_id,
-          password: hashedPassword,
-          user_role: data.role,
-          points: 0,
-        },
-      });
-      return {
-        status: 201,
-        data: {
-          user: response,
-          referral: referralResponse,
-        },
-      };
-    } else {
+
+    try {
+      const referralResponse = await this.referralService.createUserReferral(
+        data.name
+      );
+      if (referralResponse) {
+        const response = await this.prisma.users.create({
+          data: {
+            name: data.name,
+            email: data.email,
+            userReferralId: referralResponse.user_referral_id,
+            password: hashedPassword,
+            user_role: data.role,
+            points: 0,
+          },
+        });
+        return {
+          status: 201,
+          data: {
+            user: response,
+            referral: referralResponse,
+          },
+        };
+      }
+    } catch (error) {
       return {
         status: 400,
         message: "Failed to create referral",
@@ -72,6 +76,7 @@ export class AuthService {
     // CHECK IF THE USER IS AVAILABLE
     if (!user) {
       return {
+        code: "IN",
         status: 404,
         message: "invalid email",
       };
@@ -80,7 +85,8 @@ export class AuthService {
     const matchPassword = await bcrypt.compare(password, user.password);
     if (!matchPassword) {
       return {
-        status: 400,
+        code: "IN",
+        status: 404,
         message: "Invalid password",
       };
     }
@@ -105,9 +111,13 @@ export class AuthService {
     return {
       status: 200,
       data: {
-        user: updatedUser,
+        name: updatedUser.name,
+        userReferralId: updatedUser.userReferralId,
+        referral_use: updatedUser.referral_use,
+        points: updatedUser.points,
+        user_role: updatedUser.user_role,
+        refresh_token: updatedUser.refresh_token,
         access_token: accessToken,
-        refresh_token: refreshToken,
       },
     };
   }
@@ -154,7 +164,39 @@ export class AuthService {
       email,
       user.user_role
     );
-    return { accessToken };
+    return accessToken;
+  }
+
+  // /api/auth/validate-token
+  async validateToken(token: string) {
+    // Decode refresh token
+    const decodedToken = await this.authUtil.decodeToken(token);
+    console.log(token);
+    if (!decodedToken) {
+      return {
+        status: 400,
+        message: "Invalid token",
+      };
+    }
+    const { email, user_id } = decodedToken;
+
+    // Check user is available based on id
+    const user = await this.prisma.users.findUnique({
+      where: {
+        user_id: user_id,
+        email: email,
+      },
+    });
+    if (!user) {
+      return {
+        message: "User not found",
+      };
+    } else {
+      return {
+        status: 200,
+        data: user,
+      };
+    }
   }
 
   async logoutUser(user_id: number) {

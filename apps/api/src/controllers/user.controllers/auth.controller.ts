@@ -11,17 +11,17 @@ export class AuthController {
   async registerUser(req: Request, res: Response) {
     const response = await this.authService.registerUser(req.body);
     console.log("Resp:", response);
-    if (response.status === 201) {
+    if (response?.status === 201) {
       res.status(201).send({
         message: "User registered successfully",
-        data: response.data,
+        data: response,
         status: res.statusCode,
       });
     } else {
       res.status(400).send({
         message: "Failed to register user",
-        details: response.message,
-        data: response.data,
+        details: response?.message,
+        data: response,
         status: res.statusCode,
       });
     }
@@ -34,9 +34,8 @@ export class AuthController {
       res.status(200).send({
         message: "User logged in successfully",
         data: {
-          user: response.data?.user,
+          user: response.data,
           access_token: response.data?.access_token,
-          refresh_token: response.data?.refresh_token,
         },
         status: res.statusCode,
       });
@@ -44,15 +43,18 @@ export class AuthController {
       res.status(401).send({
         message: "Invalid email or password",
         detail: response.message,
-        data: response.data?.user,
+        data: response.data,
         status: res.statusCode,
       });
     }
   }
 
   async refreshAccessToken(req: Request, res: Response) {
-    const { refresh_token } = req.body;
-    const response = await this.authService.refreshAccessToken(refresh_token);
+    const refresh_token = req.headers.authorization?.split(" ")[1];
+
+    const response = await this.authService.refreshAccessToken(
+      refresh_token as string
+    );
     if (response) {
       res.status(200).send({
         message: "Access token refreshed successfully",
@@ -79,6 +81,24 @@ export class AuthController {
     } else {
       res.status(404).send({
         message: "Failed to log out user",
+        status: res.statusCode,
+      });
+    }
+  }
+  async validateToken(req: Request, res: Response) {
+    const token = req.headers.authorization?.split(" ")[1];
+    console.log(token);
+    const response = await this.authService.validateToken(token as string);
+    if (response.status === 200) {
+      res.status(200).send({
+        message: "Token is valid",
+        data: response.data,
+        status: res.statusCode,
+      });
+    } else {
+      res.status(401).send({
+        message: "Invalid token",
+        data: response,
         status: res.statusCode,
       });
     }

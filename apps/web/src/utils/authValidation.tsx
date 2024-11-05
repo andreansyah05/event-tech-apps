@@ -1,4 +1,4 @@
-import { LoginAuth, RegisterForm } from "@/models/auth";
+import { LoginAuth, RegisterForm } from "@/models/models";
 import Cookies from "js-cookie";
 import axios from "axios";
 
@@ -17,7 +17,6 @@ export class AuthHandler {
   handleRegistrationValidation(formData: RegisterForm) {
     const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
     const checkEmail = emailPattern.test(formData.email);
-    console.log(formData.password.length);
 
     if (
       formData.email === "" ||
@@ -44,16 +43,15 @@ export class AuthHandler {
       if (response.status === 200) {
         const in60Minutes = 60 / (24 * 60);
 
-        console.log(data);
         Cookies.set("access_token", data.data.access_token, {
           expires: in60Minutes,
         });
-        Cookies.set("refresh_token", data.data.refresh_token, {
+        Cookies.set("refresh_token", data.data.user.refresh_token, {
           expires: 7,
         });
-        return response;
+        return data;
       } else {
-        return response;
+        return data;
       }
     } catch (error) {
       console.log(error);
@@ -69,6 +67,64 @@ export class AuthHandler {
         role: "user",
       });
       return response;
+    } catch (error: any) {
+      return error.response.data;
+    }
+  }
+
+  async validateUserToken(token: string) {
+    try {
+      const response = await axios.get("/api/auth/validate-token", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Set the data from the response to userState
+      if (response) {
+        console.log("its execute");
+        return response.data.data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async refreshUserAcessToken(refreshToken: string) {
+    try {
+      // Get new access token
+      const response = await axios.get("/api/auth/update-token", {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      });
+
+      // Get New Access Token
+      const newAccessToken = response.data.data;
+      const in60Minutes = 60 / (24 * 60);
+
+      // Check if return access token
+      if (!newAccessToken) {
+        return undefined;
+      }
+
+      // Update access token in cookies
+      Cookies.set("access_token", newAccessToken, {
+        expires: in60Minutes,
+      });
+
+      // Validate access token after refreshing it
+      try {
+        const validateResponse = await this.validateUserToken(newAccessToken);
+        if (validateResponse) {
+          return validateResponse;
+        } else {
+          return null;
+        }
+      } catch (error) {
+        console.log("Error validating token after refresh", error);
+      }
     } catch (error) {
       console.log(error);
     }

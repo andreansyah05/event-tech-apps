@@ -11,6 +11,13 @@ export interface UserProps {
   created_at: Date;
   updated_at: Date;
 }
+export interface validateUserResponse {
+  name: string;
+  userReferralId: number;
+  referral_use: string | null;
+  points: number;
+  user_role: string;
+}
 
 export interface AuthProps {
   name: string;

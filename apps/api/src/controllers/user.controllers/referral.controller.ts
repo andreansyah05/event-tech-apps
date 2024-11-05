@@ -8,12 +8,11 @@ export class ReferralContoller {
     this.referralService = new ReferralService();
   }
   async useReferral(req: Request, res: Response) {
-    const token = req.headers.authorization?.split(" ")[1] as string;
-    console.log("Token:", token);
+    const token = req.headers.authorization?.split(" ")[1];
     const { referral_code } = req.params;
     const response = await this.referralService.useReferral(
       referral_code,
-      token
+      token as string
     );
     if (response.status === 200) {
       res.status(200).send({
@@ -21,9 +20,10 @@ export class ReferralContoller {
         status: res.statusCode,
       });
     } else {
-      res.status(401).send({
+      console.log("response:", response);
+      res.status(400).send({
         message: "Invalid referral code or token",
-        detailMessage: response.message,
+        detailMessage: response,
         status: res.statusCode,
       });
     }

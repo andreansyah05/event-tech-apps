@@ -45,7 +45,7 @@ export class ReferralService {
   }
 
   async useReferral(referral_code: string, token: string) {
-    const useReferral = 10000;
+    const useReferral = 20000;
     const ownedReferral = 35000;
     // Decode the token to get the user id
     // check if the token is valid
