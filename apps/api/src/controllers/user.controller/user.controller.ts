@@ -44,17 +44,17 @@ export class UserController {
     //     }
     // }
     async getEventById(req: Request, res: Response) {
-        const event_id = Number(req.params.eventId);
-        const event = await this.userService.getEventById(event_id);
+        const id = Number(req.params.id);
+        const event = await this.userService.getEventById(id);
         if (event) {
             res.status(200).send({
-                message: `Event with id ${event_id} retrieved successfully`,
+                message: `Event with id ${id} retrieved successfully`,
                 status: res.statusCode,
                 data: event,
             });
         } else {
             res.status(404).send({
-                message: `Event id ${event_id} not found`,
+                message: `Event id ${id} not found`,
                 status: res.statusCode,
             });
         }
