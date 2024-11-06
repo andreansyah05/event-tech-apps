@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { LoginAuth } from "@/models/auth";
-import { AuthHandler } from "@/pages/api/authValidation";
+import { LoginAuth } from "@/models/models";
+import { AuthHandler } from "@/utils/authValidation";
 import Button from "@/components/Button";
 import Link from "next/link";
 
@@ -95,6 +95,8 @@ function AdminLogin() {
             {/* Tombol Login, dibungkus dengan Link */}
 
             <Button
+              isButton={true}
+              width="w-fit"
               type="primary"
               text="Login"
               isButtonDisable={isButtonDisabled} // Mengontrol aktif/tidaknya tombol login
