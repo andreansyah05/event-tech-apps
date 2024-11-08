@@ -6,6 +6,7 @@ import referralRouter from "./routers/user.routers/referral.router";
 import cors from "cors";
 import adminRouter from "./routers/admin.routers/admin.router";
 import userRouter from "./routers/user.routers/user.router";
+import bookingEventRouter from "./routers/user.routers/bookingEvent.router";
 
 environment.config();
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/referral", referralRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/users", userRouter);
+app.use("/api/bookings", bookingEventRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening on port : ${PORT}`);

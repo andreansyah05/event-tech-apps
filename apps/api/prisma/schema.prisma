@@ -47,7 +47,7 @@ model Transaction {
   payment_ammount Float
   payment_method  String
   is_Discount     Boolean
-  is_UsePoint     Boolean
+  usePoint        Float
   Event           Event    @relation(fields: [eventId], references: [event_id])
   Users           Users    @relation(fields: [userId], references: [user_id])
 

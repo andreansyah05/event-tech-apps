@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Createeventadmin } from "@/pages/api/Create-event-admin";
+import { Createeventadmin } from "@/utils/Create-event-admin";
 import { CreateEvent } from "@/models/createevent";
 
 function CreateEventForm() {
