@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { Event, EventResponse } from "../../models/models";
 
 export class UserService {
@@ -8,9 +8,17 @@ export class UserService {
     this.prisma = new PrismaClient();
   }
 
-  async getAllEvents(): Promise<EventResponse[]> {
+  async getAllEvents() {
+    // We conditionally create the cursor object based on whether lastCursor is defined.
+    // If lastCursor is defined, we create a EventWhereUniqueInput object with the id field set to lastCursor.
+    // If lastCursor is undefined, we set cursor to undefined, which will fetch the first 3 records.
+
     // Metode untuk mengambil semua acara dari database.
     const response = await this.prisma.event.findMany({
+      take: 3,
+      orderBy: {
+        created_at: "desc",
+      },
       include: {
         Category: true,
       },
@@ -36,7 +44,88 @@ export class UserService {
       };
     });
 
-    return listEvent;
+    // Save the last id of the result
+    const lastResponseId = listEvent[listEvent.length - 1].event_id;
+
+    return {
+      data: listEvent,
+      lastCursor: lastResponseId,
+    };
+  }
+
+  async loadMoreEvents(
+    lastCursor: number,
+    searchString?: string,
+    categorySelected?: number
+  ) {
+    console.log(
+      "loadmore controller",
+      lastCursor,
+      searchString,
+      categorySelected
+    );
+    const whereClause: Prisma.EventWhereInput = {};
+    if (searchString) {
+      whereClause.event_name = {
+        contains: searchString,
+        mode: "insensitive",
+      };
+    }
+    if (categorySelected) {
+      whereClause.Category = {
+        category_id: categorySelected,
+      };
+    }
+
+    const response = await this.prisma.event.findMany({
+      take: 3,
+      skip: 1,
+      cursor: {
+        event_id: lastCursor,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      include: {
+        Category: true,
+      },
+      where: whereClause,
+    });
+
+    // Remap the response
+    const listEvent: EventResponse[] = response.map((event) => {
+      return {
+        event_id: event.event_id,
+        event_name: event.event_name,
+        categoryId: event.Category.category_id,
+        category_name: event.Category.category_name,
+        event_image: event.event_image,
+        event_description: event.event_description,
+        event_price: event.event_price,
+        event_location: event.event_location,
+        event_capacity: event.event_capacity,
+        event_start_date: new Date(event.event_start_date).toLocaleDateString(),
+        event_end_date: new Date(event.event_end_date).toLocaleDateString(),
+        discounted_price: event.discounted_price,
+        is_online: event.is_online,
+        is_paid: event.is_paid,
+      };
+    });
+    console.log(listEvent);
+    if (listEvent.length === 0) {
+      console.log("No more events to load.");
+      return {
+        data: [],
+        lastCursor: -1,
+      };
+    }
+    // Save the last id of the result
+    const lastResponseId = listEvent[listEvent.length - 1].event_id;
+
+    return {
+      data: listEvent,
+      lastCursor: lastResponseId,
+    };
   }
 
   async getEventById(event_id: number): Promise<EventResponse | undefined> {
@@ -75,20 +164,43 @@ export class UserService {
     }
   }
 
-  async getEventBySearch(searchString: string): Promise<EventResponse[]> {
+  async getEventBySearch(searchString?: string, categorySelected?: number) {
+    // Return all events if no search string or category is provided.
+    // Return events matching a specific search string if provided.
+    // Return events matching a specific category if provided.
+    // Return events matching both search string and category if both are provided.
+    const whereClause: Prisma.EventWhereInput = {};
+
+    console.log("services : ", searchString, categorySelected);
+
+    // If search string is provided, it will search event based on search string
+    if (searchString) {
+      whereClause.event_name = {
+        contains: searchString,
+        mode: "insensitive",
+      };
+    }
+
+    if (categorySelected) {
+      whereClause.Category = {
+        category_id: categorySelected,
+      };
+    }
+
     const response = await this.prisma.event.findMany({
+      take: 3,
+      orderBy: {
+        created_at: "desc",
+      },
       include: {
         Category: true,
       },
-      where: {
-        event_name: {
-          contains: searchString,
-          mode: "insensitive",
-        },
-      },
+      where: whereClause,
     });
 
-    if (response) {
+    console.log("Search Response: ", response);
+
+    if (response.length !== 0) {
       const listEvent: EventResponse[] = response.map((event) => {
         return {
           event_id: event.event_id,
@@ -109,30 +221,25 @@ export class UserService {
           is_paid: event.is_paid,
         };
       });
-
-      return listEvent;
+      // Save the last id of the result
+      const lastResponseId = listEvent[listEvent.length - 1].event_id;
+      return {
+        data: listEvent,
+        lastCursor: lastResponseId,
+      };
     } else {
       console.log("No event found with this search string.");
-      return [];
+      return {
+        data: [],
+        lastCursor: -1,
+      };
     }
   }
 
-  // async getEventCategory (                                                 // Metode untuk mengambil acara berdasarkan kategori dan pencarian.
-  //     search:string,                                                      // Parameter untuk kata kunci pencarian.
-  //     category_Id:number,                                               // Parameter untuk nama kategori.
-  //     sortBy: 'event_price' | 'event_start_date' = 'event_start_date',    // Parameter untuk menentukan kolom yang digunakan untuk pengurutan, default adalah 'event_start_date'.
-  //     sortOrder: 'asc' | 'desc' = 'asc'                                   // Parameter untuk menentukan urutan pengurutan, default adalah 'asc'.
-  // ){
-  //    return await this.prisma.event.findUnique ({                                           // Mengambil banyak acara berdasarkan kriteria pencarian dan pengurutan.
-  //         where : {
-  //             OR: [                                                                       // Menggunakan kondisi OR untuk mencari berdasarkan nama acara atau nama kategori.
-  //                 { event_name: { contains: search, mode: "insensitive" } },                  // Mencari nama acara yang mengandung string pencarian, tanpa memperhatikan kapitalisasi.
-  //                 {category_Id: { contains: category_Id, mode: "insensitive" } },    // Mencari nama kategori yang mengandung nama kategori yang diberikan, tanpa memperhatikan kapitalisasi.
-  //             ],
-  //         },
-  //         orderBy: {
-  //             [sortBy]: sortOrder,                                                        // Mengurutkan hasil berdasarkan kolom dan urutan yang ditentukan.
-  //         },
-  //     })
-  // }
+  async getAllCategory() {
+    const response = await this.prisma.category_Event.findMany();
+    if (response) {
+      return response;
+    }
+  }
 }

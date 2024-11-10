@@ -1,12 +1,14 @@
 import { EventCardProps } from "@/models/models";
 import EventCard from "./EventCard";
 import { useRouter } from "next/router";
+import Button from "./Button";
 
 interface EvenListProps {
   eventData: EventCardProps[];
+  onClick?: () => void;
 }
 
-function EventList({ eventData }: EvenListProps) {
+function EventList({ eventData, onClick }: EvenListProps) {
   const router = useRouter();
   function redirectToDetail(eventId: number) {
     router.push(`/event/${eventId}`);
@@ -38,6 +40,15 @@ function EventList({ eventData }: EvenListProps) {
             />
           );
         })}
+      </div>
+      <div className="w-full py-8 flex justify-center">
+        <Button
+          isButton={true}
+          text="Load More"
+          width="w-fit"
+          type="primary"
+          onClick={onClick}
+        />
       </div>
     </div>
   );
