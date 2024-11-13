@@ -1,10 +1,9 @@
 export interface BookingData {
   user_id: number;
+  is_paid: boolean;
   event_id: number;
   usePoint: number;
-  payment_ammount: number;
   payment_method: "QRIS" | "bank bca" | "bca_virtual account";
-  is_discount: boolean;
 }
 
 export enum BookingStatus {
@@ -15,6 +14,7 @@ export enum BookingStatus {
 }
 
 export enum BookingServiceCode {
+  TransactionAvailable = "TA",
   BookingCreated = "BC",
   NAQuoata = "NAQ",
   RegistarationClose = "RC",
@@ -23,4 +23,6 @@ export enum BookingServiceCode {
   UpdateToPaid = "UP",
   UpdateToCanceled = "UC",
   Unauthorized = "UT",
+  FreeEvent = "FREE",
+  NotEnoughPoint = "NEP",
 }

@@ -37,6 +37,49 @@ export class BookingEventService {
     // });
   }
 
+  async getDetailUserBooking(user_id: number, transaction_id: number) {
+    // Check transaction and make sure the owner of the transaction is same as the user_id we passing
+    const transaction = await this.prisma.transaction.findUnique({
+      where: {
+        transaction_id: transaction_id,
+      },
+      include: {
+        Event: {
+          select: {
+            Category: {
+              select: {
+                category_name: true,
+              },
+            },
+            event_image: true,
+            event_name: true,
+            event_start_date: true,
+            is_online: true,
+            event_description: true,
+            event_location: true,
+            event_end_date: true,
+          },
+        },
+      },
+    });
+    if (!transaction) {
+      return {
+        code: BookingServiceCode.NoTransactionFound,
+        message: "Transaction not found",
+      };
+    } else if (transaction.userId !== user_id) {
+      return {
+        code: BookingServiceCode.Unauthorized,
+        message: "User not authorized to access this transaction",
+      };
+    } else {
+      return {
+        code: BookingServiceCode.TransactionAvailable,
+        transaction,
+      };
+    }
+  }
+
   async createBookingEvent(bookingData: BookingData) {
     // 1. Make sure the user that booking is exist
     // 2. Make sure the event that user booking is exist
@@ -57,6 +100,9 @@ export class BookingEventService {
     const event = await this.prisma.event.findUnique({
       where: {
         event_id: bookingData.event_id,
+      },
+      include: {
+        Discount: true,
       },
     });
     if (!event) {
@@ -85,6 +131,7 @@ export class BookingEventService {
         },
       });
 
+      // Check if the user is already join or not with the status still waiting for payment
       if (checkUserJoined) {
         console.log("Checked", checkUserJoined);
         console.log("Checked status", checkUserJoined.status_order);
@@ -119,19 +166,34 @@ export class BookingEventService {
       };
     }
 
+    // 4. Check if the user use point, check the point balance are the user have it or not
+    if (bookingData.usePoint > user.points && bookingData.is_paid) {
+      console.log("execute over point");
+      return {
+        code: BookingServiceCode.NotEnoughPoint,
+        message: "User don't have enough point",
+      };
+    }
+
     // 4. Create a new booking record in the database
+    const finalAmmount = event.Discount.is_active
+      ? bookingData.usePoint === 0
+        ? event.discounted_price
+        : event.discounted_price - bookingData.usePoint
+      : bookingData.usePoint === 0
+        ? event.event_price
+        : event.event_price - bookingData.usePoint;
+
+    console.log(bookingData.is_paid, finalAmmount);
 
     const newBooking = await this.prisma.transaction.create({
       data: {
         userId: bookingData.user_id,
         eventId: bookingData.event_id,
         usePoint: bookingData.usePoint,
-        payment_ammount:
-          bookingData.usePoint === 0
-            ? bookingData.payment_ammount
-            : bookingData.payment_ammount - bookingData.usePoint,
+        payment_ammount: bookingData.is_paid ? finalAmmount : 0,
         payment_method: bookingData.payment_method,
-        is_Discount: bookingData.is_discount,
+        is_Discount: event.Discount.is_active,
         status_order: BookingStatus.WaitingForPayment,
         order_date: currentDate,
       },
@@ -150,7 +212,7 @@ export class BookingEventService {
     });
 
     // 5. Decrement the user point if the book use point
-    if (bookingData.usePoint !== 0) {
+    if (bookingData.usePoint !== 0 && bookingData.is_paid !== false) {
       await this.prisma.users.update({
         where: {
           user_id: bookingData.user_id,

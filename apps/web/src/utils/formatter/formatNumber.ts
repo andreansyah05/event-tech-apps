@@ -1,4 +1,4 @@
-export function formatNumber(number: number) {
+export function formatNumber(number: number): string {
   console.log(number);
   const numStr = number.toString();
   const decimalIndex = numStr.length - 3;

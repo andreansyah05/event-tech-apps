@@ -25,7 +25,7 @@ function NavigationBar({ isLogin, point, name }: NavigationBarProps) {
   }
 
   // Fetch data user based on access token
-  async function handleFethingUserData(userToken: string) {
+  async function handleFethingUserData(userToken: string): Promise<void> {
     try {
       const response = await authHandler.validateUserToken(userToken);
       console.log("New data user (data)", response);
@@ -38,7 +38,7 @@ function NavigationBar({ isLogin, point, name }: NavigationBarProps) {
   }
 
   // Refersh user token
-  async function refreshUserAcessToken(refreshToken: string) {
+  async function refreshUserAcessToken(refreshToken: string): Promise<void> {
     try {
       const response = await authHandler.refreshUserAcessToken(refreshToken);
 
@@ -98,7 +98,7 @@ function NavigationBar({ isLogin, point, name }: NavigationBarProps) {
         <Image
           width={64}
           height={64}
-          className="w-6 h-6"
+          className={`w-6 h-6 ease-in-out transition-transform duration-200 ${showMenu ? "rotate-180" : "rotate-0"}`}
           alt="coin"
           src="/icon/dropdown.svg"
         />
