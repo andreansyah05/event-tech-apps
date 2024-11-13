@@ -15,7 +15,7 @@ function Button({
   isButton,
   type,
   text,
-  isButtonDisable,
+  isButtonDisable = false,
   width,
   onClick,
   href,
@@ -27,6 +27,7 @@ function Button({
         case "primary":
           return (
             <button
+              onClick={onClick}
               disabled={isButtonDisable}
               onClick={onClick}
               className={`${width} font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
@@ -48,6 +49,7 @@ function Button({
         case "secondary":
           return (
             <button
+              onClick={onClick}
               disabled={isButtonDisable}
               className={`${width} font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
             >
@@ -69,34 +71,31 @@ function Button({
       switch (type) {
         case "primary":
           return (
-            <Link href={href as string}>
-              <button
-                className={`${width} font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
-              >
-                {text}
-              </button>
+            <Link
+              href={href as string}
+              className={`${width} inline-block font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+            >
+              {text}
             </Link>
           );
 
         case "primary-border":
           return (
-            <Link href={href as string}>
-              <button
-                className={`${width} font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
-              >
-                {text}
-              </button>
+            <Link
+              href={href as string}
+              className={`${width} inline-block font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+            >
+              {text}
             </Link>
           );
 
         case "secondary":
           return (
-            <Link href={href as string}>
-              <button
-                className={`${width} font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
-              >
-                {text}
-              </button>
+            <Link
+              href={href as string}
+              className={`${width} inline-block font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
+            >
+              {text}
             </Link>
           );
 

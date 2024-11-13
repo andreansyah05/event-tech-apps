@@ -1,3 +1,4 @@
+import { Request } from "express";
 import environment from "dotenv";
 import jwt from "jsonwebtoken";
 import { TokenPayloadProps } from "../models/user.interface";
@@ -57,5 +58,15 @@ export class AuthUtils {
       }
     );
     return accessToken;
+  }
+
+  async getAuthenticatedUser(req: Request) {
+    const accessToken = req.headers.authorization?.split(" ")[1];
+    if (!accessToken) {
+      throw new Error("Unauthorized");
+    }
+
+    const decodedToken = await this.decodeToken(accessToken);
+    return decodedToken;
   }
 }

@@ -13,6 +13,7 @@ interface AuthContextProps {
   userLogin: (userData: UserProps | null) => void;
   userLogout: () => void;
   updateUserPoint: (referralCode: string) => void;
+  decreseUserPoint: (point: number) => void;
 }
 
 // Create Context and define the default value
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextProps>({
   userLogin: () => {},
   userLogout: () => {},
   updateUserPoint: () => {},
+  decreseUserPoint: () => {},
 });
 
 export function AuthProvider({ children }: UserProviderProps) {
@@ -56,7 +58,14 @@ export function AuthProvider({ children }: UserProviderProps) {
     }
   }
 
-  function handleFetchDataUser() {}
+  function decreseUserPoint(point: number) {
+    if (user) {
+      setUser({
+        ...user,
+        points: user.points - point,
+      });
+    }
+  }
 
   return (
     <AuthContext.Provider
@@ -67,6 +76,7 @@ export function AuthProvider({ children }: UserProviderProps) {
         userLogout,
         isLoading,
         updateUserPoint,
+        decreseUserPoint,
       }}
     >
       {children}

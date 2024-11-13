@@ -1,6 +1,6 @@
 import { LoginAuth, RegisterForm } from "@/models/models";
 import Cookies from "js-cookie";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 export class AuthHandler {
   // Fungsi untuk validasi form login
@@ -29,7 +29,7 @@ export class AuthHandler {
       if (response.status === 200) {
         const in60Minutes = 1 / 24; // Mengatur masa kedaluwarsa access_token (60 menit)
 
-        console.log(data);
+        console.log("Handle Login Admin", data);
         Cookies.set("access_token", data.data.access_token, {
           expires: in60Minutes,
         });
