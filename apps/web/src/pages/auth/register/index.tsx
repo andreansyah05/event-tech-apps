@@ -14,7 +14,6 @@ function RegisterPage() {
   const authHandler = new AuthHandler();
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
-  const [showToast, setShowToast] = useState<boolean>(false);
   const [toast, setToast] = useState<Toast>({
     highlightText: "",
     text: "",
