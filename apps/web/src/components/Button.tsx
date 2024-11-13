@@ -28,6 +28,7 @@ function Button({
           return (
             <button
               disabled={isButtonDisable}
+              onClick={onClick}
               className={`${width} font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >
               {isLoading ? "Loading..." : text}
