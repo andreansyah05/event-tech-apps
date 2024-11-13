@@ -3,12 +3,17 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Event } from "@/models/createevent";
 import Link from "next/link";
+import { useAuth } from "@/utils/userContext";
+import { AuthHandler } from "@/utils/authValidation";
 
 function Listevent() {
+  const [user_token, setUserToken] = useState("");
   const [events, setEvents] = useState([]);
   console.log("test:", events);
   const [inputSearch, setInputSearch] = useState<string>("");
   const isInitialRender = useRef<boolean>(true); // Check if its already be render or not
+  const { user, userLogin } = useAuth();
+  const authHandler = new AuthHandler();
 
   async function eventsearch(search: string) {
     try {
@@ -36,7 +41,6 @@ function Listevent() {
       });
 
       const response = await axios.get("/api/admin/events"); // Ganti dengan URL API Anda
-
       // Jika respons berhasil, set data dan tutup SweetAlert
       if (response) {
         setEvents(response.data.data);
@@ -79,6 +83,26 @@ function Listevent() {
     }
   }
 
+  const handleEdit = (eventId: number) => {
+    // Menampilkan konfirmasi menggunakan SweetAlert
+    Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Anda akan diarahkan ke halaman edit event ini.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, edit!",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Jika pengguna mengonfirmasi, arahkan ke halaman edit
+        console.log(`Editing event with ID: ${eventId}`);
+        window.location.href = `/admin/update-event/${eventId}`;
+      } else {
+        console.log("Edit dibatalkan");
+      }
+    });
+  };
+
   function handleDelete(event_id: number) {
     Swal.fire({
       title: "Apakah Anda yakin ingin menghapus event ini?",
@@ -103,11 +127,28 @@ function Listevent() {
     });
   }
 
+  // function UpdateEventPage() {
+  //   const router = useRouter();
+
+  //   // Mengakses query parameter "eventId"
+  //   const { eventId } = router.query;
+  //   if (eventId) {
+  //     router.push(`/admin/update-event/${eventId}`);
+  //   }
+  // }
+
+  // Refersh user token
+
   useEffect(() => {
     // Check the status of render
     if (isInitialRender.current) {
-      isInitialRender.current = false;
+      console.log("exec render");
+      // Check if the data user already available
+
       getAllEvents();
+      isInitialRender.current = false;
+
+      // Do nothing
     } else {
       const timeoutId = setTimeout(() => {
         handlerSearchingEvent(inputSearch);
@@ -190,12 +231,17 @@ function Listevent() {
                   {event.event_end_date as string}
                 </td>
                 <td className="border px-4 py-2">
-                  <button
+                  <Link
                     className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
-                    // onClick={() => handleEdit(event.id)}
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault(); // Mencegah navigasi default
+                      handleEdit(event.event_id); // Memanggil fungsi handleEdit
+                    }}
                   >
                     Edit
-                  </button>
+                  </Link>
+
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded"
                     onClick={() => handleDelete(event.event_id)}

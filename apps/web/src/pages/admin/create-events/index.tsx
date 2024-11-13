@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Createeventadmin } from "@/pages/api/Create-event-admin";
+import { CreateEventAdmin } from "@/utils/Create-event-admin";
 import { CreateEvent } from "@/models/createevent";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 function CreateEventForm() {
   const router = useRouter();
@@ -18,8 +20,22 @@ function CreateEventForm() {
     is_online: true, // Default ke online
     is_paid: false, // Default ke gratis
     discount_percentage: 0,
-    is_active: true, // Default ke active
+    is_active: false, // Default ke active
   });
+  console.log("ini adalah form data:", formData);
+
+  const [errors, setErrors] = useState({
+    is_paid: "",
+    event_price: "",
+    discount_percentage: "",
+  });
+
+  const handleRadioChange = (value: boolean) => {
+    setFormData({
+      ...formData,
+      is_paid: value,
+    });
+  };
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
@@ -29,39 +45,208 @@ function CreateEventForm() {
     }));
   };
 
-  const handleFileChange = (e: { target: { files: any[] } }) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prevData) => ({
-        ...prevData,
-        event_image: URL.createObjectURL(file), // Simpan URL sementara
-      }));
-    }
-  };
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    // event_name: string; // Nama acara
-    // event_image: string; // URL gambar acara
-    // event_description: string; // Deskripsi acara
-    // event_price: number; // Harga acara
-    // event_location: string; // Lokasi acara
-    // event_capacity: number; // Kapasitas acara
-    // categoryId: number; // ID kategori
-    // event_start_date: string; // Tanggal dan waktu mulai acara
-    // event_end_date: string; // Tanggal dan waktu selesai acara
-    // is_online: string | boolean; // Apakah acara ini online
-    // is_paid: string | boolean; // Apakah acara ini bayar atau gratis
-    // discount_percentage: number; // Persentase diskon
-    // is_active: string | boolean; // Status aktif diskon
+    // Validasi form data
+    if (!formData.event_name || formData.event_name.trim() === "") {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Nama event wajib di isi !",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (!formData.event_image) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Gambar wajib di isi !",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (
+      !formData.event_capacity ||
+      isNaN(formData.event_capacity) ||
+      formData.event_capacity <= 0
+    ) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Kapasitas event harus berupa angka dan lebih besar dari 0.",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (
+      !formData.categoryId ||
+      isNaN(formData.categoryId) ||
+      formData.categoryId <= 0
+    ) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Category event harus di pilih",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (
+      !formData.event_description ||
+      formData.event_description.trim() === ""
+    ) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Deskripsi wajib di isi !",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (formData.is_paid === true) {
+      if (formData.event_price === undefined || formData.event_price <= 0) {
+        Swal.fire({
+          title: " PERHATIKAN FIELDNYA!",
+          text: "Harga event harus berupa angka dan lebih besar dari 0.",
+          imageUrl:
+            "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+          imageWidth: 400,
+          imageHeight: 200,
+          imageAlt: " ",
+        });
+        return;
+      }
+      if (
+        formData.discount_percentage === undefined ||
+        formData.discount_percentage <= 0
+      ) {
+        Swal.fire({
+          title: " PERHATIKAN FIELDNYA!",
+          text: "Persentase diskon harus antara 0 dan 100.",
+          imageUrl:
+            "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+          imageWidth: 400,
+          imageHeight: 200,
+          imageAlt: " ",
+        });
+        return;
+      }
+    }
+
+    if (!formData.event_start_date) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Tanggal mulai event wajib di isi",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (!formData.event_end_date) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Tanggal selesai event wajib di isi",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (
+      new Date(formData.event_start_date) >= new Date(formData.event_end_date)
+    ) {
+      Swal.fire({
+        title: " PERHATIKAN FIELDNYA!",
+        text: "Tanggal mulai event harus sebelum tanggal selesai event.",
+        imageUrl:
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: " ",
+      });
+      return;
+    }
+
+    if (formData.is_online === true) {
+      if (formData.is_online === undefined) {
+        Swal.fire({
+          title: " PERHATIKAN FIELDNYA!",
+          text: "Status event online harus di pilih",
+          imageUrl:
+            "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+          imageWidth: 400,
+          imageHeight: 200,
+          imageAlt: " ",
+        });
+        return;
+      }
+    }
+
+    if (formData.is_online === false) {
+      if (formData.is_online === undefined) {
+        Swal.fire({
+          title: " PERHATIKAN FIELDNYA!",
+          text: "Status event online harus di pilih",
+          imageUrl:
+            "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+          imageWidth: 400,
+          imageHeight: 200,
+          imageAlt: " ",
+        });
+        return;
+      }
+      if (formData.event_location.trim() === "") {
+        Swal.fire({
+          title: " PERHATIKAN FIELDNYA!",
+          text: "Lokasi event wajib di isi",
+          imageUrl:
+            "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczhjcnpzOGZzMnN5enE0d3h4dTJlcnV5MHZ4a2d0OXJ1MG16NTRncCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YTzh3zw4mj1XpjjiIb/giphy.webp",
+          imageWidth: 400,
+          imageHeight: 200,
+          imageAlt: " ",
+        });
+        return;
+      }
+    }
 
     console.log("testiiii", formData);
     const data = new FormData();
     data.append("event_name", formData.event_name);
     data.append("event_description", formData.event_description);
     data.append("event_price", formData.event_price.toString());
-    data.append("event_location", formData.event_location);
+    data.append(
+      "event_location",
+      formData.is_online ? "Online" : formData.event_location
+    );
     data.append("event_capacity", formData.event_capacity.toString());
     data.append("categoryId", formData.categoryId.toString());
     data.append("event_start_date", formData.event_start_date);
@@ -73,7 +258,7 @@ function CreateEventForm() {
     data.append("event_image", formData.event_image);
 
     try {
-      await Createeventadmin(data).then((response) => {
+      await CreateEventAdmin(data).then((response) => {
         if (response) {
           console.log(response);
           alert("Event berhasil dibuat!");
@@ -83,445 +268,393 @@ function CreateEventForm() {
     } catch (error) {
       alert("Terjadi kesalahan: ");
     }
-  }
-
-  // const handleSubmit = async (e: { preventDefault: () => void }) => {
-  //   e.preventDefault();
-
-  //   // Ubah event start dan end date ke format yang sesuai
-  //   const eventPayload = {
-  //     ...formData,
-  //     event_start_date: new Date(formData.event_start_date),
-  //     event_end_date: new Date(formData.event_end_date),
-  //   };
-  //   console.log(eventPayload);
-
-  //   try {
-  //     Createeventadmin(eventPayload);
-  //     alert("Event berhasil dibuat!");
-  //   } catch (error) {
-  //     alert("Terjadi kesalahan: ");
-  //   }
-  // };
-  // console.log(formData);
+  };
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-2">
-          {/* EVENT NAME */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Name
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_name",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="text"
-            required
-          />
-        </div>
+        <div className="bg-gray-100">
+          <div className="container mx-auto p-6">
+            <h1 className="text-3xl font-bold mb-6">CREATE NEW EVENT</h1>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT DESCRIPTION */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_description"
-          >
-            Event description
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_description",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="text"
-            required
-          />
-        </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+              {/* Event Name */}
+              <div>
+                <label
+                  htmlFor="event-title"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Event Name
+                </label>
+                <input
+                  type="text"
+                  id="event-title"
+                  name="event_name"
+                  value={formData.event_name}
+                  onChange={(e) =>
+                    handleChange({
+                      target: { name: "event_name", value: e.target.value },
+                    })
+                  }
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Ex: Tech Conference 2024"
+                />
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT IMAGE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event-image"
-          >
-            Event Image
-          </label>
-          <input
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="file"
-            accept="image/"
-            onChange={(e: any) => {
-              if (e.target.files && e.target.files.length > 0) {
-                handleChange({
-                  target: {
-                    name: "event_image",
-                    value: e.target.files[0],
-                  },
-                });
-              }
-            }}
-            required
-          />
-        </div>
+              {/* Event Image */}
+              <div>
+                <label
+                  htmlFor="event-image"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Event Image
+                </label>
+                <input
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleChange({
+                        target: {
+                          name: "event_image",
+                          value: e.target.files[0],
+                        },
+                      });
+                    }
+                  }}
+                  type="file"
+                  id="event-image"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT PRICE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Price
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_price",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="number"
-            required
-          />
-        </div>
+              {/* Event Quota */}
+              <div>
+                <label
+                  htmlFor="quota-event"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Quota Event
+                </label>
+                <input
+                  type="number"
+                  id="quota-event"
+                  name="event_capacity"
+                  value={formData.event_capacity}
+                  onChange={(e) =>
+                    handleChange({
+                      target: { name: "event_capacity", value: e.target.value },
+                    })
+                  }
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Ex: 25"
+                />
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT NAME */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Location
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_location",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="text"
-            required
-          />
-        </div>
+              {/* Event Category */}
+              <div>
+                <label
+                  htmlFor="event-category"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Event Category
+                </label>
+                <select
+                  id="event-category"
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={(e) =>
+                    handleChange({
+                      target: { name: "categoryId", value: e.target.value },
+                    })
+                  }
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                >
+                  <option value={0}>Select Category</option>
+                  <option value={1}>Tech</option>
+                  <option value={2}>Music</option>
+                  <option value={3}>Art</option>
+                </select>
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT CAPACITY */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Capacity
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_capacity",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="number"
-            required
-          />
-        </div>
+              {/* Event Description */}
+              <div className="col-span-1 sm:col-span-2">
+                <label
+                  htmlFor="event-description"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Event Description
+                </label>
+                <textarea
+                  id="event-description"
+                  name="event_description"
+                  value={formData.event_description}
+                  onChange={(e) =>
+                    handleChange({
+                      target: {
+                        name: "event_description",
+                        value: e.target.value,
+                      },
+                    })
+                  }
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Describe the event..."
+                ></textarea>
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT CATEGORY */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Select Category
-          </label>
-          <select
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "categoryId",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            name="category"
-            id="category"
-          >
-            <option value="1"></option>
-            <option value="1"></option>
-            <option value="1"></option>
-          </select>
-        </div>
+              {/* Paid/Free Event Radio */}
+              <div className="col-span-1 sm:col-span-2">
+                <label
+                  htmlFor="paid-or-free"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Paid Or Free Event
+                </label>
+                <div className="flex gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="paidEvent"
+                      name="is_paid"
+                      checked={formData.is_paid === true}
+                      onChange={(e) =>
+                        handleChange({
+                          target: { name: "is_paid", value: true },
+                        })
+                      }
+                    />
+                    <label htmlFor="paidEvent" className="ml-2 font-medium">
+                      Paid Event
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="freeEvent"
+                      name="is_paid"
+                      checked={formData.is_paid === false}
+                      onChange={(e) =>
+                        handleChange({
+                          target: { name: "is_paid", value: false },
+                        })
+                      }
+                    />
+                    <label htmlFor="freeEvent" className="ml-2 font-medium">
+                      Free Event
+                    </label>
+                  </div>
+                </div>
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT START DATE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Start Data
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_start_date",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="date"
-            required
-          />
-        </div>
+              {/* Event Price */}
+              {formData.is_paid && (
+                <div className="col-span-1 sm:col-span-2">
+                  <label
+                    htmlFor="eventPrice"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Event Price
+                  </label>
+                  <input
+                    type="number"
+                    id="eventPrice"
+                    name="event_price"
+                    value={formData.event_price}
+                    onChange={(e) =>
+                      handleChange({
+                        target: { name: "event_price", value: e.target.value },
+                      })
+                    }
+                    placeholder="Ex: 25000"
+                    className="border rounded-md px-3 py-2 w-full"
+                  />
+                </div>
+              )}
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT END DATE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event END DATE
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_end_date",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="date"
-            required
-          />
-        </div>
+              {/* Discount Percentage - Hide if Free Event */}
+              {formData.is_paid && (
+                <div className="flex gap-4 col-span-1 sm:col-span-2">
+                  <div className="flex flex-col w-full">
+                    <label
+                      htmlFor="discountPercentage"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Set Event Discount
+                    </label>
+                    <input
+                      type="number"
+                      id="discountPercentage"
+                      name="discount_percentage"
+                      value={formData.discount_percentage}
+                      onChange={(e) =>
+                        handleChange({
+                          target: {
+                            name: "discount_percentage",
+                            value: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Discount Percentage"
+                      className="border rounded-md px-3 py-2"
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="Discount_active"
+                      name="Discount_active"
+                      onChange={(e) =>
+                        handleChange({
+                          target: {
+                            name: "Discount_active",
+                            value: e.target.checked,
+                          },
+                        })
+                      }
+                    />
+                    <label htmlFor="Discount_active" className="ml-2">
+                      Set discount to active
+                    </label>
+                  </div>
+                </div>
+              )}
 
-        <div className="flex flex-col gap-2">
-          {/* EVENT CAPACITY */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Capacity
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_capacity",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="number"
-            required
-          />
-        </div>
+              {/* Event Start & End Dates */}
+              <div className="flex gap-4 col-span-1 sm:col-span-2">
+                <div className="flex flex-col w-full">
+                  <label
+                    htmlFor="eventStartDate"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Set start date
+                  </label>
+                  <input
+                    type="date"
+                    id="eventStartDate"
+                    name="event_start_date"
+                    value={formData.event_start_date}
+                    onChange={(e) =>
+                      handleChange({
+                        target: {
+                          name: "event_start_date",
+                          value: e.target.value,
+                        },
+                      })
+                    }
+                    className="border rounded-md px-3 py-2"
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <label
+                    htmlFor="eventEndDate"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Set end date
+                  </label>
+                  <input
+                    type="date"
+                    id="eventEndDate"
+                    name="event_end_date"
+                    value={formData.event_end_date}
+                    onChange={(e) =>
+                      handleChange({
+                        target: {
+                          name: "event_end_date",
+                          value: e.target.value,
+                        },
+                      })
+                    }
+                    className="border rounded-md px-3 py-2"
+                  />
+                </div>
+              </div>
 
-        <div className="flex flex-col gap-2">
-          {/* DISCOUNTED PERCENTAGE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Discounted Percentage
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "discount_percentage",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="number"
-            required
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          {/* DISCOUNTED PRICE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Discounted Price
-          </label>
-          <input
-            onChange={(e: any) => {
-              handleChange({
-                target: {
-                  name: "event_name",
-                  value: e.target.value,
-                },
-              });
-            }}
-            className="w-full px-3 py-2 border rounded-md shadow-sm
-          placeholder-gray-400 focus:outline-none focus:ring-2
-          focus:ring-blue-500"
-            type="number"
-            required
-            disabled
-          />
-        </div>
+              {/* Location Online or Offline */}
+              <div className="col-span-1 sm:col-span-2">
+                <label
+                  htmlFor="is_online"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Location Online or Offline
+                </label>
 
-        <div className="flex flex-col gap-2">
-          {/* DISCOUNTED PRICE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Event Online?
-          </label>
-          <div className="flex gap-1">
-            <input
-              onChange={(e: any) => {
-                handleChange({
-                  target: {
-                    name: "is_online",
-                    value: true,
-                  },
-                });
-              }}
-              id="is_online"
-              name="is_online"
-              className="w-full px-3 py-2 border rounded-md shadow-sm
-            placeholder-gray-400 focus:outline-none focus:ring-2
-              focus:ring-blue-500"
-              type="radio"
-              required
-            />
-            <label htmlFor="is_online">Event Online</label>
-          </div>
-          <div className="flex gap-1">
-            <input
-              onChange={(e: any) => {
-                handleChange({
-                  target: {
-                    name: "is_online",
-                    value: false,
-                  },
-                });
-              }}
-              id="is_online"
-              name="is_online"
-              className="w-full px-3 py-2 border rounded-md shadow-sm
-            placeholder-gray-400 focus:outline-none focus:ring-2
-              focus:ring-blue-500"
-              type="radio"
-              required
-            />
-            <label htmlFor="is_online">Event Offline</label>
-          </div>
-        </div>
+                {/* Radio Button for Event Location */}
+                <div className="flex items-center space-x-4 flex-wrap">
+                  <div className="flex gap-4">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="is_online"
+                        name="is_online"
+                        checked={formData.is_online === true}
+                        onChange={(e) =>
+                          handleChange({
+                            target: { name: "is_online", value: true },
+                          })
+                        }
+                      />
+                      <label htmlFor="is_online" className="ml-2 font-medium">
+                        Online
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="is_offline"
+                        name="is_online"
+                        checked={formData.is_online === false}
+                        onChange={(e) =>
+                          handleChange({
+                            target: { name: "is_online", value: false },
+                          })
+                        }
+                      />
+                      <label htmlFor="is_offline" className="ml-2 font-medium">
+                        Offline
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
-        <div className="flex flex-col gap-2">
-          {/* DISCOUNTED PRICE */}
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="event_name"
-          >
-            Is event free?
-          </label>
-          <div className="flex gap-1">
-            <input
-              onChange={(e: any) => {
-                handleChange({
-                  target: {
-                    name: "is_paid",
-                    value: true,
-                  },
-                });
-              }}
-              value="PAID"
-              id="is_paid"
-              name="is_paid"
-              className="w-full px-3 py-2 border rounded-md shadow-sm
-            placeholder-gray-400 focus:outline-none focus:ring-2
-              focus:ring-blue-500"
-              type="radio"
-              required
-            />
-            <label htmlFor="is_paid">Paid Event</label>
-          </div>
-          <div className="flex gap-1">
-            <input
-              onChange={(e: any) => {
-                handleChange({
-                  target: {
-                    name: "is_paid",
-                    value: false,
-                  },
-                });
-              }}
-              id="is_paid"
-              name="is_paid"
-              className="w-full px-3 py-2 border rounded-md shadow-sm
-            placeholder-gray-400 focus:outline-none focus:ring-2
-              focus:ring-blue-500"
-              type="radio"
-              value="FREE"
-              required
-            />
-            <label htmlFor="is_paid">Free Event</label>
+                {/* Event Location (Tampil hanya jika Offline) */}
+                {formData.is_online === false && (
+                  <div className="col-span-1 sm:col-span-2 mt-5">
+                    <label
+                      htmlFor="event-location"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Event Location
+                    </label>
+                    <textarea
+                      id="event-location"
+                      name="event_location"
+                      value={formData.event_location}
+                      onChange={(e) =>
+                        handleChange({
+                          target: {
+                            name: "event_location",
+                            value: e.target.value,
+                          },
+                        })
+                      }
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      placeholder="Event Location"
+                    ></textarea>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <div className="col-span-1 sm:col-span-2">
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                >
+                  Create Event
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-gray-400 text-white rounded-md font-bold hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        >
-          CREATE NEW EVENT
-        </button>
       </form>
     </>
   );

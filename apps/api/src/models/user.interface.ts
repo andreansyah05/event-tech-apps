@@ -29,5 +29,5 @@ export interface AuthProps {
 export interface TokenPayloadProps {
   user_id: number;
   email: string;
-  role: string;
+  user_role: string;
 }

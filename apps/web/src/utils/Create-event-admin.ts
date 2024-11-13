@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const Createeventadmin = async (formData: any) => {
+export const CreateEventAdmin = async (formData: any) => {
   const discountPercentage = formData.discounted_price;
   const is_active = formData.is_active;
 

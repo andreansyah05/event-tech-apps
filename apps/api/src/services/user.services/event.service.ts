@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Event, EventResponse } from "../../models/models";
+import { Event, EventResponse } from "../../models/admin.interface";
 
 export class UserService {
   private prisma: PrismaClient;
