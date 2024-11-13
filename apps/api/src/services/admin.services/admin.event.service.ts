@@ -1,8 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { Event, EventResponse } from "../../models/models";
+import { Event, EventResponse } from "../../models/admin.interface";
 import { env } from "process";
 import cloudinary from "../../config/cloudinary";
-import { Discount } from "../../models/models";
+import { Discount } from "../../models/admin.interface";
+import { unlink } from "fs/promises";
 
 export class AdminService {
   private prisma: PrismaClient;
@@ -47,7 +48,11 @@ export class AdminService {
 
   async getEventById(event_id: number) {
     // Mengambil event tunggal berdasarkan ID yang diberikan
-    return this.prisma.event.findUnique({ where: { event_id } });
+    console.log("tesssst", event_id);
+    return this.prisma.event.findUnique({
+      where: { event_id },
+      include: { Discount: true },
+    });
   }
 
   async createEvent(eventData: Event, discountData: Discount) {
@@ -108,28 +113,49 @@ export class AdminService {
     discountPercentage: number,
     is_active: boolean
   ) {
+    console.log("Service event id: ", event_id);
+    console.log("Service discount id: ", discount_id);
+    console.log("Service Event Data: ", updatedEventData);
+    console.log("Service Discount percentage: ", discountPercentage);
+    console.log("Service is active: ", is_active);
+
     // Menghitung harga setelah diskon untuk event yang diperbarui
-    const originalPrice = updatedEventData.event_price as number; // Mengambil harga asli
+    const originalPrice = updatedEventData?.event_price as number; // Mengambil harga asli
     const discountedPrice = originalPrice * (1 - discountPercentage / 100); // Menghitung harga diskon
+    let image: string | undefined = undefined;
+    if (updatedEventData.event_image) {
+      // upload gambar ke cloudinary
+      const upload = await cloudinary.uploader.upload(
+        updatedEventData.event_image,
+        {
+          folder: "events",
+        }
+      );
+      image = upload.secure_url;
+
+      // Memperbarui event berdasarkan ID
+    }
 
     // Memperbarui acara berdasarkan ID
+
     const updatedEvent = await this.prisma.event.update({
       where: { event_id: event_id }, // Mencari event berdasarkan ID
       data: {
         event_name: updatedEventData.event_name,
-        event_image: updatedEventData.event_image,
+        event_image: image,
         event_description: updatedEventData.event_description,
         discounted_price: discountedPrice, // Menyimpan harga diskon baru
-        event_price: updatedEventData.event_price,
+        event_price: Number(updatedEventData.event_price),
         event_location: updatedEventData.event_location,
-        event_capacity: updatedEventData.event_capacity,
-        categoryId: updatedEventData.categoryId,
+        event_capacity: Number(updatedEventData.event_capacity),
+        categoryId: Number(updatedEventData.categoryId),
         event_start_date: new Date(updatedEventData.event_start_date), // Mengonversi ke tipe Date
         event_end_date: new Date(updatedEventData.event_end_date), // Mengonversi ke tipe Date
         is_online: updatedEventData.is_online,
         is_paid: updatedEventData.is_paid,
       },
     });
+    console.log("updateeventdata:", updatedEventData);
 
     // Memperbarui diskon terkait dengan event
     const newDiscount = await this.prisma.dicount_Event.update({
@@ -149,6 +175,13 @@ export class AdminService {
     const dataEvent = await this.prisma.event.findUnique({
       where: {
         event_id: event_id,
+      },
+    });
+
+    // Hapus transaksi terkait terlebih dahulu
+    await this.prisma.transaction.deleteMany({
+      where: {
+        eventId: event_id, // Ganti dengan ID event yang ingin dihapus
       },
     });
 

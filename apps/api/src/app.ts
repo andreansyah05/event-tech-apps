@@ -25,6 +25,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/referral", referralRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/users", userRouter);
+
 app.use("/api/bookings", bookingEventRouter);
 
 app.listen(PORT, () => {

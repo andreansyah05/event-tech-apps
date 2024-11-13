@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { AdminService } from "../../services/admin.services/admin.event.service";
-import { CreateEvent, Discount, Event } from "../../models/models";
+import { CreateEvent, Discount, Event } from "../../models/admin.interface";
 
 export class AdminController {
   private adminService: AdminService;
+  getListUsers: any;
   constructor() {
     this.adminService = new AdminService();
   }
@@ -29,7 +30,8 @@ export class AdminController {
 
   async getEventById(req: Request, res: Response) {
     const id = Number(req.params.id); // Mengambil ID dari parameter URL dan mengonversinya ke Number
-    const event = await this.adminService.getEventById(id); // Mengambil event berdasarkan ID
+    console.log("test id:", id);
+    const event = await this.adminService.getEventById(Number(id)); // Mengambil event berdasarkan ID
     if (event) {
       // Jika event ditemukan, kirim respon dengan status 200
       res.status(200).send({
@@ -48,6 +50,7 @@ export class AdminController {
   }
 
   async createEvent(req: Request, res: Response) {
+    console.log("req create:", req);
     try {
       const {
         categoryId,
@@ -86,6 +89,7 @@ export class AdminController {
         event_capacity: event_capacity, // Kapasitas acara
         event_start_date: new Date(event_start_date), // Tanggal dan waktu mulai acara
         event_end_date: new Date(event_end_date), // Tanggal dan waktu selesai acara
+        is_active: is_active === "true" ? true : false,
         is_online: is_online === "true" ? true : false, // Apakah acara ini online
         is_paid: is_paid === "true" ? true : false, // Apakah acara ini bayar atau gratis
         event_image: image, // Gambar acara
@@ -114,36 +118,84 @@ export class AdminController {
       });
     }
   }
-
+  // Fungsi untuk menangani request update event
   async updateEvent(req: Request, res: Response) {
-    const id = Number(req.params.id); // Mengambil ID dari parameter URL dan mengonversinya ke Number
-    const discount_id = Number(req.params.discount_id); // Mengambil ID diskon dari body permintaan
-    const updatedEventData = req.body.data; // Mengambil data event yang diperbarui dari body permintaan
-    const discountPercentage = Number(req.body.discountPercentage); // Mengambil persentase diskon baru
-    const is_active = Boolean(req.body.is_active); // Mengambil status aktif baru
+    console.log("ini adakah req :", req);
+    try {
+      // Mengambil event_id dari parameter URL
+      const event_id = Number(req.params.id); // Mendapatkan event_id dari URL
 
-    // Memperbarui event menggunakan adminService
-    const updatedEvent = await this.adminService.updateEvent(
-      id,
-      discount_id,
-      updatedEventData,
-      discountPercentage,
-      is_active
-    );
+      // Mengambil data dari request body
+      const {
+        categoryId,
+        category_name,
+        discount_percentage,
+        event_capacity,
+        event_description,
+        event_end_date,
+        event_image,
+        event_location,
+        event_name,
+        event_price,
+        event_start_date,
+        is_active,
+        is_online,
+        is_paid,
+        discountId,
+      }: CreateEvent = req.body;
 
-    if (updatedEvent) {
-      // Jika event berhasil diperbarui, kirim respon dengan status 200
-      res.status(200).send({
-        message: "Event updated successfully", // Pesan sukses
-        status: res.statusCode, // Menyertakan status kode dari respon
-        data: updatedEvent, // Menyertakan data event yang diperbarui
-      });
-    } else {
-      // Jika event tidak ditemukan, kirim respon dengan status 404
-      res.status(404).send({
-        message: `Event id ${id} not found`, // Pesan error
-        status: res.statusCode, // Menyertakan status kode dari respon
-        details: res.statusMessage, // Menyertakan pesan status
+      console.log("ini reqbody guys:", req.body);
+
+      // Menyediakan file image jika ada
+      const image = (req as any).file?.path || ""; // Mengambil path image yang diupload
+      console.log("Event Image", image);
+
+      // Menyiapkan data untuk update event
+      const updateEventData: Event = {
+        event_name: event_name,
+        categoryId: categoryId,
+        event_description: event_description,
+        event_price: event_price,
+        event_location: event_location,
+        event_capacity: event_capacity,
+        event_start_date: new Date(event_start_date), // Konversi ke tipe Date
+        event_end_date: new Date(event_end_date), // Konversi ke tipe Date
+        is_online: is_online === "true" ? true : false,
+        is_paid: is_paid === "true" ? true : false,
+        event_image: image,
+      };
+
+      console.log("Updated Event Data:", updateEventData);
+      console.log("Discount percentage:", discount_percentage); // Log untuk debugging, menampilkan persentase diskon
+
+      // Panggil service untuk memperbarui event dan diskon
+      const updatedEvent = await this.adminService.updateEvent(
+        event_id, // event_id dari parameter URL
+        Number(discountId), // discount_id dari parameter URL
+        updateEventData, // Data event yang akan diperbarui
+        Number(discount_percentage), // Persentase diskon
+        is_active ? true : false // Status aktif diskon
+      );
+
+      // Jika event berhasil diperbarui, kirim response
+      if (updatedEvent) {
+        res.status(200).send({
+          message: "Event updated successfully",
+          status: res.statusCode,
+          data: updatedEvent, // Mengembalikan data event yang telah diperbarui
+        });
+      } else {
+        res.status(404).send({
+          message: `Event with ID ${event_id} not found.`,
+          status: res.statusCode,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).send({
+        message: "Failed to update event",
+        status: res.statusCode,
+        details: res.statusMessage,
       });
     }
   }
