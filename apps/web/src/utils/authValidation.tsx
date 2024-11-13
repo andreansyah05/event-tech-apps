@@ -90,6 +90,7 @@ export class AuthHandler {
       }
     } catch (error) {
       console.log(error); // Menampilkan error jika terjadi kesalahan
+      return error;
     }
   }
 

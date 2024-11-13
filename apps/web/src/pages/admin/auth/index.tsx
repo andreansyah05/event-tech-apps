@@ -96,6 +96,8 @@ function AdminLogin() {
             {/* Tombol Login, dibungkus dengan Link */}
 
             <Button
+              isButton={true}
+              width="w-fit"
               type="primary"
               text="Login"
               isButtonDisable={isButtonDisabled} // Mengontrol aktif/tidaknya tombol login
