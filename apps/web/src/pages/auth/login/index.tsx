@@ -5,8 +5,8 @@ import { AuthHandler } from "@/utils/authValidation";
 import Button from "@/components/Button";
 import Link from "next/link";
 import { useAuth } from "@/utils/userContext";
-import Cookies from "js-cookie";
 import { redirectIfLogin } from "@/utils/redirectIfLogin";
+import ToastAlert, { Toast } from "@/components/alert";
 
 function LoginPage() {
   // Check if the user already login or not
@@ -19,6 +19,13 @@ function LoginPage() {
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(false); // Track data loading state
+  // Toast State
+  const [toast, setToast] = useState<Toast>({
+    highlightText: "",
+    text: "",
+    type: "FAILED",
+    showToast: false,
+  });
 
   // LOGIN STATE
   const [formData, setFormData] = useState<LoginAuth>({
@@ -51,6 +58,18 @@ function LoginPage() {
         console.log("status === 200");
         userLogin(response.data.user);
         router.push("/");
+      } else {
+        console.log("error : ", response);
+        setToast({
+          highlightText: "Login Failed",
+          text: "Invalid Email or Password",
+          type: "FAILED",
+          showToast: true,
+        });
+        setIsLoading(false);
+        setTimeout(() => {
+          setToast({ ...toast, showToast: false });
+        }, 1500);
       }
     } catch (error) {
       console.log("Something went wrong :", error);
@@ -63,6 +82,12 @@ function LoginPage() {
 
   return (
     <>
+      <ToastAlert
+        type={toast.type}
+        highlightText={toast.highlightText}
+        text={toast.text}
+        showToast={toast.showToast}
+      />
       <div className="p-4 md:flex md:h-screen md:justify-center md:items-center ">
         <div className="max-w-screen-sm mx-auto  p-5 border border-zinc-200 rounded bg-white md:p-10 ">
           <h1 className="font-bold text-2xl mb-9 md:text-3xl">

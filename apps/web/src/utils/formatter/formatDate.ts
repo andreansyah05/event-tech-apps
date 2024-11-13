@@ -1,4 +1,4 @@
-export function formatDate(dateString: string) {
+export function formatDate(dateString: string): string {
   // Parse the input date string into a Date object
   const date = new Date(dateString);
 
@@ -7,15 +7,7 @@ export function formatDate(dateString: string) {
   // Get the day of the week (0-6, where 0 is Sunday)
   const dayOfWeek = date.getDay();
 
-  const dayNames = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
 
   // Get the month name (0-11, where 0 is January)
   const month = date.getMonth();

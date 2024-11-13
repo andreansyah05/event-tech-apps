@@ -37,5 +37,48 @@ export interface EventCardProps {
   is_online: boolean; // Apakah acara ini online
   is_paid: boolean; // Apakah acara ini bayar atau gratis
   event_description: string;
+  event_location: string;
   onClick?: () => void;
+}
+
+export interface BookingData {
+  user_id?: number;
+  event_id: number;
+  usePoint: number;
+  payment_method: PaymentMethod;
+  is_paid: boolean;
+}
+
+export enum PaymentMethod {
+  QRIS = "QRIS",
+  BankBCA = "Bank BCA",
+  BCAVirtualAccount = "BCA Virtual Account",
+}
+
+export enum BookingServiceCode {
+  TransactionAvailable = "TA",
+  BookingCreated = "BC",
+  NAQuoata = "NAQ",
+  RegistarationClose = "RC",
+  WaitingForPayment = "WFP",
+  NoTransactionFound = "NOF",
+  UpdateToPaid = "UP",
+  UpdateToCanceled = "UC",
+  Unauthorized = "UT",
+}
+
+export interface TransactionPageProps {
+  transaction_id: number;
+  event_image: string; // URL gambar acara
+  event_name: string; // Nama acara
+  category_name: string;
+  event_start_date: string; // Tanggal dan waktu mulai acara
+  event_end_date: string; // Tanggal dan waktu selesai acara
+  is_online: boolean; // Apakah acara ini online
+  event_description: string;
+  payment_ammount: number | 0;
+  order_date: string;
+  status_order: string;
+  event_location: string;
+  payment_method: string;
 }

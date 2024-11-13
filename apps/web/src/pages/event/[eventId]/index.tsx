@@ -9,12 +9,17 @@ import NavigationBar from "@/components/NavigationBar";
 import { useAuth } from "@/utils/userContext";
 import LoadingEventDetail from "./loading";
 import { formatDate } from "@/utils/formatter/formatDate";
+import BookingModal from "@/components/BookingModal";
+import Overlay from "@/components/Overlay";
+import MultiPurposeModal, { ModalProps } from "@/components/MultiPurposeModal";
 
 function DetailEvent() {
   const { isLogin, user } = useAuth();
+  const [eventId, setEventId] = useState<number>(0);
   const eventHandlerApi = new EventHandlerApi(); // Initialize event handler API
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true); // Track data loading state
+  const [showBookingModal, setShowBookingModal] = useState<boolean>(false); // Track data loading state
 
   const [event, setEvent] = useState<EventCardProps>({
     event_id: "",
@@ -29,6 +34,7 @@ function DetailEvent() {
     event_end_date: "",
     event_start_date: "",
     discounted_price: 0,
+    event_location: "",
   });
 
   const formatedEventStartDate = formatDate(
@@ -47,15 +53,23 @@ function DetailEvent() {
       </p>
     );
 
-  async function handleGetEventById(eventId: number) {
+  async function handleGetEventById(eventId: number): Promise<void> {
     try {
       setIsLoading(true);
       const response = await eventHandlerApi.geEventById(eventId);
+      console.log("Response event detail :", response);
       setEvent(response.data);
       setIsLoading(false);
     } catch (error) {
       console.error(error);
     }
+  }
+  function handleShowModal(): void {
+    console.log("click");
+    setShowBookingModal(true);
+  }
+  function handleCloseModal(): void {
+    setShowBookingModal(false);
   }
 
   useEffect(() => {
@@ -63,10 +77,30 @@ function DetailEvent() {
     if (eventId) {
       // Fetch event data when component mounts or when eventId changes in the URL query
       handleGetEventById(Number(eventId));
+      setEventId(Number(eventId));
     }
   }, [router.query]); // Specify router.query as a dependency
+
   return (
     <>
+      {showBookingModal ? (
+        <BookingModal
+          event_id={eventId}
+          event_date={eventDate}
+          event_image={event?.event_image}
+          event_name={event?.event_name}
+          event_price={event?.event_price}
+          user_points={user?.points as number}
+          isShow={showBookingModal}
+          closeModal={handleCloseModal}
+          end_date={formatedEndStartDate}
+          start_date={formatedEventStartDate}
+          isPaid={event.is_paid}
+        />
+      ) : (
+        ""
+      )}
+
       <NavigationBar
         userRole="user"
         isLogin={isLogin}
@@ -123,9 +157,7 @@ function DetailEvent() {
                   </div>
                   <p className="hidden lg:block">-</p>
                   <p className="text-gray-900">
-                    {event?.is_online
-                      ? "Online"
-                      : "Detail_Location_Placeholder"}
+                    {event.is_online ? "Online" : event.event_location}
                   </p>
                 </div>
               </div>
@@ -142,15 +174,14 @@ function DetailEvent() {
                   </div>
                 </div>
                 {isLogin ? (
-                  <div className="">
-                    <Button
-                      isButton={false}
-                      href="http://localhost:3000/auth/login"
-                      width="w-full"
-                      type="secondary"
-                      text="Book Ticket"
-                    />
-                  </div>
+                  <Button
+                    isButton={true}
+                    onClick={handleShowModal}
+                    width="w-full"
+                    type="secondary"
+                    text="Book Ticket"
+                    isButtonDisable={false}
+                  />
                 ) : (
                   <div className="mb-4">
                     <p className="text-white font-semibold mb-4 text-sm">

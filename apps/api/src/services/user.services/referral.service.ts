@@ -72,6 +72,7 @@ export class ReferralService {
         message: "Referral code has been used",
       };
     }
+    console.log("Referral :", referral);
 
     // user of the owner of referral
     const referralOwner = await this.prisma.users.findFirst({
@@ -80,6 +81,7 @@ export class ReferralService {
       },
     });
     if (!referralOwner) {
+      console.log(referralOwner);
       return { status: 404, message: "Referral owner not found" };
     }
 

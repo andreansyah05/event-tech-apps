@@ -11,5 +11,7 @@ router.get(
   "/search-events",
   userController.getEventBySearch.bind(userController)
 );
+router.get("/load-more", userController.loadMoreEvents.bind(userController));
+router.get("/categories", userController.getAllCategory.bind(userController));
 
 export default router;
