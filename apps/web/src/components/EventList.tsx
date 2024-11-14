@@ -34,6 +34,7 @@ function EventList({ eventData, onClick }: EvenListProps) {
               event_capacity={event.event_capacity}
               is_online={event.is_online}
               is_paid={event.is_paid}
+              event_location={event.event_location}
               onClick={() => {
                 redirectToDetail(event.event_id as number);
               }}

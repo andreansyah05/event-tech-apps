@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { useAuth } from "@/utils/userContext";
 import Cookies from "js-cookie";
-import Overlay from "./Overlay";
 import { useState } from "react";
 
 function UserMenu() {

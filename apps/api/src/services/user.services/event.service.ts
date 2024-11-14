@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { PrismaClient } from "@prisma/client";
-import { Event, EventResponse } from "../../models/admin.interface";
-=======
 import { PrismaClient, Prisma } from "@prisma/client";
-import { Event, EventResponse } from "../../models/models";
->>>>>>> development
+import { Event, EventResponse } from "../../models/admin.interface";
 
 export class UserService {
   private prisma: PrismaClient;

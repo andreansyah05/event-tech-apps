@@ -38,7 +38,7 @@ CREATE TABLE "techevent"."Transaction" (
     "payment_ammount" DOUBLE PRECISION NOT NULL,
     "payment_method" TEXT NOT NULL,
     "is_Discount" BOOLEAN NOT NULL,
-    "is_UsePoint" BOOLEAN NOT NULL,
+    "usePoint" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("transaction_id")
 );
