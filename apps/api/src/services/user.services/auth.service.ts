@@ -129,14 +129,17 @@ export class AuthService {
     // generate a new access token
 
     // Decode refresh token
+    console.log("Refresh Token", token);
     const decodedToken = await this.authUtil.decodeToken(token);
-    console.log(token);
     if (!decodedToken) {
       return {
+        errorCode: "IT",
         message: "Invalid token",
       };
     }
     const { email, user_id } = decodedToken;
+
+    console.log("Decoded Token Result", decodedToken);
 
     // Check user is available based on id
     const user = await this.prisma.users.findUnique({
@@ -147,6 +150,7 @@ export class AuthService {
     });
     if (!user) {
       return {
+        errorCode: "UNF",
         message: "User not found",
       };
     }
@@ -154,6 +158,7 @@ export class AuthService {
     // Check if the refresh token is match wiyh the user
     if (user.refresh_token !== token) {
       return {
+        errorCode: "IRT",
         message: "Invalid refresh token",
       };
     }
@@ -164,7 +169,7 @@ export class AuthService {
       email,
       user.user_role
     );
-    return accessToken;
+    return { code: "GUT", accessToken, user_role: user.user_role };
   }
 
   // /api/auth/validate-token

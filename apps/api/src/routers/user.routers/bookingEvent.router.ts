@@ -37,6 +37,13 @@ router.put(
   bookingEventController.cancelBooking.bind(bookingEventController)
 );
 
+router.post(
+  "/booking-review",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("user").bind(authMiddleware),
+  bookingEventController.bookingReview.bind(bookingEventController)
+);
+
 // Berhubungan dengan admin
 // 1. Lakukan validasi token terlebih dahulu
 // 2. apabila validasi token berhasil maka cek role dari user yang didapat dari token.

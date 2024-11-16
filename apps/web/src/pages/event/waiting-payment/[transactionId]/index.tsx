@@ -12,9 +12,10 @@ import Chips from "@/components/Chips";
 import Button from "@/components/Button";
 import MultiPurposeModal, { ModalProps } from "@/components/MultiPurposeModal";
 import Overlay from "@/components/Overlay";
+import { UniqueCode } from "@/models/models";
 
 function WaitingPaymentPage() {
-  const userToken = Cookies.get("access_token");
+  const userToken = Cookies.get(`access${UniqueCode.USER}_token`);
   const bookingHandler = new BookingHandler();
   const router = useRouter();
   const { isLogin, user } = useAuth();
@@ -30,8 +31,8 @@ function WaitingPaymentPage() {
     title: "Payment Successful",
     subTitle: "Your payment has been processed successfully.",
     primaryButton: {
-      text: "View Order",
-      href: "/event/35",
+      text: "View My Booking",
+      href: "/user/transaction-history",
     },
     secondaryButton: {
       text: "Explore More Event",
@@ -106,12 +107,9 @@ function WaitingPaymentPage() {
       console.log(error);
     }
   }
-  console.log(transaction);
 
   useEffect(() => {
     const { transactionId } = router.query;
-    // const userToken = Cookies.get("access_token");
-    console.log(transactionId);
 
     if (transactionId && userToken) {
       // Fetch event data when component mounts or when eventId changes in the URL query
@@ -150,38 +148,40 @@ function WaitingPaymentPage() {
         ""
       )}
       {transaction ? (
-        <div className="max-w-xl h-full p-4 md:mx-auto ">
-          {/* <!-- Modal content --> */}
-          {/* <!-- Modal header --> */}
-          <div className=" border-b border-b-gray-300 py-5 ">
-            <div className="mb-5">
-              <h3 className="text-3xl font-bold text-gray-900 ">
+        <section className="p-4">
+          <div className="mt-10 max-w-2xl h-full p-5 md:mx-auto bg-white border border-zinc-200 rounded-md">
+            {/* <!-- Modal content --> */}
+            {/* <!-- Modal header --> */}
+            <div className=" border-b border-b-gray-300 py-5 ">
+              <h3 className="text-3xl font-bold text-gray-900 mb-10">
                 Please Complete your payment
               </h3>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-700 text-sm font-semibold">
-                Order Date : <span>{formatDate(transaction.order_date)}</span>
-              </p>
-              <div className="text-sm bg-yellow-100 rounded-md p-2 font-semibold">
-                {transaction.status_order}
+
+              <div className="flex justify-between items-center">
+                <p className="text-gray-700 text-sm">
+                  Order Date : <span>{formatDate(transaction.order_date)}</span>
+                </p>
+                <div className="text-sm bg-yellow-100 rounded-md p-2 font-semibold">
+                  {transaction.status_order}
+                </div>
               </div>
             </div>
-          </div>
-          {/* <!-- Modal body --> */}
-          <div className="py-7 ">
-            <h3 className=" font-bold text-gray-900 mb-4">Order Detail</h3>
-            <div className="flex flex-col gap-7">
-              <div className="grid grid-cols-2 gap-7 ">
-                <div>
+            {/* <!-- Modal body --> */}
+            <div className="py-7 ">
+              <h3 className="text-lg font-bold text-gray-900 mb-5">
+                Your Booking Detail
+              </h3>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="col-span-2">
                   <p className="text-sm text-gray-500 mb-3">Event Name</p>
-                  <h2 className=" font-bold text-gray-950 uppercase lg:text-xl">
+                  <h2 className=" font-bold text-gray-950 uppercase lg:text-2xl">
                     {transaction.event_name}
                   </h2>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-3">Event Category</p>
-                  <Chips text={transaction.category_name} />
+                  <Chips type="CATEGORY" text={transaction.category_name} />
                 </div>
                 <div className="col-span-2">
                   <p className="text-sm text-gray-500 mb-3">Event Schedule</p>
@@ -217,29 +217,29 @@ function WaitingPaymentPage() {
                 </div>
               </div>
             </div>
-          </div>
-          {/* <!-- Modal footer --> */}
-          <div className="sm:flex sm:items-center sm:justify-between sm:gap-5 bg-indigo-50 p-5 rounded-md">
-            <div className="flex justify-between items-center mb-5 sm:flex-col sm:mb-0 ">
-              <p className="text-sm text-gray-700 mb-1 font-semibold">
-                Payment Ammount
-              </p>
-              <h2 className="text-2xl font-bold">Rp {formattedNumber}</h2>
+            {/* <!-- Modal footer --> */}
+            <div className="sm:flex sm:items-center sm:justify-between sm:gap-5 bg-indigo-50 p-5 rounded-md">
+              <div className="flex justify-between items-center mb-5 sm:flex-col sm:mb-0 ">
+                <p className="text-sm text-gray-700 mb-1 font-semibold">
+                  Payment Ammount
+                </p>
+                <h2 className="text-2xl font-bold">Rp {formattedNumber}</h2>
+              </div>
+              <div className="flex gap-4 items-center justify-between">
+                <p className="text-sm text-gray-700 font-semibold">
+                  Already Paid?
+                </p>
+                <Button
+                  isButton={true}
+                  text="Confirm Payment"
+                  type="primary"
+                  width="w-fit"
+                  onClick={handleConfirmPayment}
+                />
+              </div>
             </div>
-            <div className="flex gap-4 items-center justify-between">
-              <p className="text-sm text-gray-700 font-semibold">
-                Already Paid?
-              </p>
-              <Button
-                isButton={true}
-                text="Confirm Payment"
-                type="primary"
-                width="w-fit"
-                onClick={handleConfirmPayment}
-              />
-            </div>
           </div>
-        </div>
+        </section>
       ) : (
         ""
       )}

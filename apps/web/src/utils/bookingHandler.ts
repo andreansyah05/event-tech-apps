@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BookingData } from "@/models/models";
+import { BookingData, ReviewData } from "@/models/models";
 
 export class BookingHandler {
   async bookingEvent(bookingData: BookingData, token: string) {
@@ -82,6 +82,24 @@ export class BookingHandler {
 
       console.log(response.data);
       return response.data.data;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
+  async reviewBookings(token: string, reviewData: ReviewData) {
+    try {
+      const response = await axios.post(
+        "/api/bookings/booking-review",
+        reviewData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      return response.data;
     } catch (error) {
       console.log(error);
       return error;

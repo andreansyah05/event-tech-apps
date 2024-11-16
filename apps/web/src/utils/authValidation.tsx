@@ -1,6 +1,9 @@
-import { LoginAuth, RegisterForm } from "@/models/models";
+import { LoginAuth, RegisterForm, ReviewData } from "@/models/models";
 import Cookies from "js-cookie";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { UniqueCode } from "@/models/models";
 
 export class AuthHandler {
   // Fungsi untuk validasi form login
@@ -13,36 +16,6 @@ export class AuthHandler {
       return true;
     } else {
       return false; // Mengembalikan false jika semua validasi terpenuhi
-    }
-  }
-
-  async handleLoginAdmin(formData: LoginAuth) {
-    try {
-      const response = await axios.post("/api/auth/login-user", {
-        email: formData.email,
-        password: formData.password,
-      });
-
-      const data = response.data;
-
-      // Jika respons status adalah 200, set cookies untuk access_token dan refresh_token
-      if (response.status === 200) {
-        const in60Minutes = 1 / 24; // Mengatur masa kedaluwarsa access_token (60 menit)
-
-        console.log("Handle Login Admin", data);
-        Cookies.set("access_token", data.data.access_token, {
-          expires: in60Minutes,
-        });
-        Cookies.set("refresh_token", data.data.refresh_token, {
-          expires: 7,
-        });
-        return true; // Login berhasil
-      } else {
-        return false; // Login gagal
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      return false; // Login gagal
     }
   }
 
@@ -64,26 +37,51 @@ export class AuthHandler {
     }
   }
 
+  handleReviewValidation(reviewData: ReviewData) {
+    // Validasi reviewData disini
+
+    if (reviewData.isAttend) {
+      // Validasi review_content dan review_rating disini
+      if (reviewData.review_content === "" || reviewData.review_rating === 0) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (!reviewData.isAttend) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   // Fungsi untuk mengirim data login ke server
-  async handleSubmitData(formData: LoginAuth) {
+  async handleSubmitData(formData: LoginAuth, scope: "user" | "admin") {
     try {
-      const response = await axios.post("/api/auth/login-user", {
-        email: formData.email, // Mengirim email dari form
-        password: formData.password, // Mengirim password dari form
-      });
+      const response = await axios.post(
+        scope == "user" ? "/api/auth/login-user" : "/api/auth-admin/login",
+        {
+          email: formData.email, // Mengirim email dari form
+          password: formData.password, // Mengirim password dari form
+        }
+      );
       const data = response.data; // Menyimpan respons data
-      console.log("anjing:", data);
 
       // Jika respons status adalah 200, set cookies untuk access_token dan refresh_token
       if (response.status === 200) {
         const in60Minutes = 60 / (24 * 60); // Mengatur masa kedaluwarsa access_token (60 menit)
+        const uniqueCode =
+          scope === "user" ? UniqueCode.USER : UniqueCode.ADMIN;
 
-        Cookies.set("access_token", data.data.access_token, {
+        Cookies.set(`access${uniqueCode}_token`, data.data.access_token, {
           expires: in60Minutes, // Cookie access_token kedaluwarsa dalam 1 jam
         });
-        Cookies.set("refresh_token", data.data.user.refresh_token, {
-          expires: 7,
-        });
+        Cookies.set(
+          `refresh${uniqueCode}_token`,
+          data.data.user.refresh_token,
+          {
+            expires: 7,
+          }
+        );
         return data;
       } else {
         return data;
@@ -118,13 +116,12 @@ export class AuthHandler {
       });
       // Set the data from the response to userState
       if (response) {
-        console.log("its execute");
         return response.data.data;
       } else {
         return null;
       }
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
@@ -137,33 +134,67 @@ export class AuthHandler {
         },
       });
 
-      // Get New Access Token
-      const newAccessToken = response.data.data;
-      const in60Minutes = 60 / (24 * 60);
+      if (response.data.data.code === "GUT") {
+        // Get New Access Token
+        const newAccessToken = response.data.data.accessToken;
+        const in60Minutes = 60 / (24 * 60);
 
-      // Check if return access token
-      if (!newAccessToken) {
-        return undefined;
-      }
+        const uniqueCode =
+          response.data.data.user_role === "user"
+            ? UniqueCode.USER
+            : UniqueCode.ADMIN;
 
-      // Update access token in cookies
-      Cookies.set("access_token", newAccessToken, {
-        expires: in60Minutes,
-      });
-
-      // Validate access token after refreshing it
-      try {
-        const validateResponse = await this.validateUserToken(newAccessToken);
-        if (validateResponse) {
-          return validateResponse;
-        } else {
-          return null;
+        // Check if return access token
+        if (!newAccessToken) {
+          return undefined;
         }
-      } catch (error) {
-        console.log("Error validating token after refresh", error);
+
+        // Update access token in cookies
+        Cookies.set(`access${uniqueCode}_token`, newAccessToken, {
+          expires: in60Minutes,
+        });
+
+        // Validate access token after refreshing it
+        try {
+          const validateResponse = await this.validateUserToken(newAccessToken);
+          if (validateResponse) {
+            return validateResponse;
+          } else {
+            return null;
+          }
+        } catch (error) {
+          console.log("Error validating token after refresh", error);
+        }
       }
     } catch (error) {
-      console.log(error); // Menampilkan error jika terjadi kesalahan
+      Cookies.remove("access_token");
+      Cookies.remove("refresh_token");
     }
+  }
+
+  redirectIfUserLogin() {
+    const router = useRouter();
+    useEffect(() => {
+      // Check if user is already logged in
+      const accessToken = Cookies.get(`access${UniqueCode.USER}_token`);
+      const refreshToken = Cookies.get(`refresh${UniqueCode.USER}_token`);
+      if (accessToken || refreshToken) {
+        router.push("/"); // Redirect to home page if already logged in
+      }
+    }, []);
+    return null;
+  }
+
+  redirectIfUserNotLogin() {
+    const router = useRouter();
+    useEffect(() => {
+      // Check if user is already logged in
+      const accessToken = Cookies.get(`access${UniqueCode.USER}_token`);
+      const refreshToken = Cookies.get(`refresh${UniqueCode.USER}_token`);
+      if (!accessToken || !refreshToken) {
+        router.push("/"); // Redirect to home page if already logged in
+      }
+    }, []);
+    return null;
   }
 }

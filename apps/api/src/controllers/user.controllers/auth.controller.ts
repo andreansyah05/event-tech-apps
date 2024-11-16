@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthStatusResponseCode } from "../../models/auth.interface";
 
 import { AuthService } from "../../services/user.services/auth.service";
 
@@ -55,15 +56,28 @@ export class AuthController {
     const response = await this.authService.refreshAccessToken(
       refresh_token as string
     );
-    if (response) {
+    if (response.code === AuthStatusResponseCode.SuccessGenerateUserToken) {
       res.status(200).send({
         message: "Access token refreshed successfully",
         data: response,
         status: res.statusCode,
       });
-    } else {
+    } else if (
+      response.errorCode === AuthStatusResponseCode.InvalidRefreshToken
+    ) {
       res.status(401).send({
         message: "Invalid refresh token",
+        data: response,
+        status: res.statusCode,
+      });
+    } else if (response.errorCode === AuthStatusResponseCode.UserNotFound) {
+      res.status(404).send({
+        message: "User not found",
+        status: res.statusCode,
+      });
+    } else if (response.errorCode === AuthStatusResponseCode.InvalidToken) {
+      res.status(401).send({
+        message: "Invalid token",
         data: response,
         status: res.statusCode,
       });

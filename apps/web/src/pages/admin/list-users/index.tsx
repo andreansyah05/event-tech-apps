@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { user } from "@/models/listUsers"; // Pastikan tipe user sesuai dengan struktur data
 import Swal from "sweetalert2";
+import NavigationBar from "@/components/NavigationBar";
+import { useAuth } from "@/utils/userContext";
 
 const Index = () => {
   // Menggunakan nama state yang lebih deskriptif
   const [users, setUsers] = useState<user[]>([]);
+  const isInitialRender = useRef<boolean>(true); // Check if its already be render or not
+
+  const { user, isLogin, isLoading } = useAuth();
 
   // Fungsi untuk mengambil data users
   const getAllUsers = async () => {
@@ -45,64 +50,92 @@ const Index = () => {
       console.error("Error fetching users:", error);
     }
   };
+  function handleUnAuthorized() {
+    Swal.fire({
+      title: "You need to login as admin!",
+      icon: "error",
+      confirmButtonText: "Back to login",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/auth";
+      }
+    });
+  }
 
-  // Mengambil data saat komponen dimount
   useEffect(() => {
-    getAllUsers();
-  }, []); // Dependency array kosong agar hanya dipanggil sekali saat komponen pertama kali dimount
-
-  console.log("cek:", users);
+    if (isInitialRender.current) {
+      if (!isLoading) {
+        if (user?.user_role === "admin") {
+          getAllUsers();
+          isInitialRender.current = false;
+        } else {
+          console.log("execute if user are not admin");
+          handleUnAuthorized();
+        }
+      }
+    }
+  }, [isLoading]);
 
   return (
-    <div className="container mx-auto mt-10">
-      <h1 className="text-2xl font-bold text-gray-800">LIST USER</h1>
+    <>
+      <NavigationBar userRole="admin" isLogin={isLogin} />
 
-      <table className="min-w-full bg-white border border-gray-300 mt-10">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2 bg-slate-100">Name</th>
+      {user?.user_role === "admin" ? (
+        <div className="container mx-auto mt-10">
+          <h1 className="text-2xl font-bold text-gray-800">LIST USER</h1>
 
-            <th className="border px-4 py-2 bg-slate-100">Email</th>
+          <table className="min-w-full bg-white border border-gray-300 mt-10">
+            <thead>
+              <tr>
+                <th className="border px-4 py-2 bg-slate-100">Name</th>
 
-            <th className="border px-4 py-2 bg-slate-100">Points</th>
+                <th className="border px-4 py-2 bg-slate-100">Email</th>
 
-            <th className="border px-4 py-2 bg-slate-100">Use Referral</th>
+                <th className="border px-4 py-2 bg-slate-100">Points</th>
 
-            <th className="border px-4 py-2 bg-slate-100">Referral Code</th>
+                <th className="border px-4 py-2 bg-slate-100">Use Referral</th>
 
-            <th className="border px-4 py-2 bg-slate-100">Register At</th>
-          </tr>
-        </thead>
+                <th className="border px-4 py-2 bg-slate-100">Referral Code</th>
 
-        <tbody>
-          {users?.length > 0 ? (
-            users.map((user: user, index) => (
-              <tr key={index}>
-                <td className="border px-4 py-2"> {user.name}</td>
-                <td className="border px-4 py-2"> {user.email}</td>
-                <td className="border px-4 py-2"> {user.points}</td>
-                <td className="border px-4 py-2">
-                  {user.user_referral.total_use}
-                </td>
-                <td className="border px-4 py-2">
-                  {user.user_referral.referral_code}
-                </td>
-                <td className="border px-4 py-2">
-                  {" "}
-                  Register At {user.created_at}
-                </td>
+                <th className="border px-4 py-2 bg-slate-100">Register At</th>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td className="border px-4 py-2 text-center">
-                No events available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+
+            <tbody>
+              {users?.length > 0 ? (
+                users.map((user: user, index) => (
+                  <tr key={index}>
+                    <td className="border px-4 py-2"> {user.name}</td>
+                    <td className="border px-4 py-2"> {user.email}</td>
+                    <td className="border px-4 py-2"> {user.points}</td>
+                    <td className="border px-4 py-2">
+                      {user.user_referral.total_use}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {user.user_referral.referral_code}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {" "}
+                      Register At {user.created_at}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="border px-4 py-2 text-center">
+                    No events available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
   );
 };
 

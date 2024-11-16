@@ -4,6 +4,7 @@ import {
   BookingServiceCode,
 } from "../../models/booking.interface";
 import { PrismaClient } from "@prisma/client";
+import { ReviewData } from "../../models/booking.interface";
 
 export class BookingEventService {
   private prisma: PrismaClient;
@@ -17,7 +18,11 @@ export class BookingEventService {
     const bookings = await this.prisma.users.findUnique({
       where: { user_id: user_id },
       include: {
-        transaction: true,
+        transaction: {
+          include: {
+            Event: true,
+          },
+        },
       },
     });
     if (!bookings) {
@@ -127,9 +132,13 @@ export class BookingEventService {
                 equals: bookingData.user_id,
               },
             },
+            {
+              status_order: BookingStatus.WaitingForPayment,
+            },
           ],
         },
       });
+      console.log("Check User Join", checkUserJoined);
 
       // Check if the user is already join or not with the status still waiting for payment
       if (checkUserJoined) {
@@ -346,6 +355,97 @@ export class BookingEventService {
         data: updateTransaction,
         status: BookingServiceCode.UpdateToCanceled,
         message: "Transaction updated to canceled",
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async bookingReview(reviewData: ReviewData) {
+    // 1. Make sure the transaction is exist in Database
+    // 2. Make sure the user and the event is exactly the same with in the transaction
+    // 3. If value isAttend is false
+    // 4. Create a new review for the transaction
+    // 5. but with the value rating and description is null
+    // 6. change status to completed
+    // 7. If the isAttend is true
+    // 9. Create a new review for the transaction
+    // 10. Change status booking to completed
+
+    const currentDate = new Date();
+
+    const transaction = await this.prisma.transaction.findUnique({
+      where: {
+        transaction_id: reviewData.transaction_id,
+      },
+      include: {
+        Event: true,
+        Users: true,
+      },
+    });
+
+    if (!transaction) {
+      return {
+        status: BookingServiceCode.NoTransactionFound,
+        message: "Transaction not found",
+      };
+    }
+    if (transaction.status_order !== BookingStatus.Paid) {
+      return {
+        status: BookingServiceCode.TransactionisPaid,
+        message: "Transaction status is not paid",
+      };
+    }
+    if (currentDate < transaction.Event.event_start_date) {
+      return {
+        status: BookingServiceCode.EventNotStartYet,
+        message: "Cannot Review, This event has not started yet",
+      };
+    }
+    if (
+      transaction.Users.user_id !== reviewData.userId ||
+      transaction.Event.event_id !== reviewData.eventId
+    ) {
+      return {
+        status: BookingServiceCode.Unauthorized,
+        message: "User or event not match with transaction",
+      };
+    }
+
+    try {
+      const createReview = await this.prisma.review.create({
+        data: {
+          eventId: reviewData.eventId,
+          userId: reviewData.userId,
+          review_rating: reviewData.isAttend ? reviewData.review_rating : -1,
+          review_content: reviewData.isAttend ? reviewData.review_content : "",
+          created_at: new Date(),
+        },
+      });
+      if (!createReview) {
+        return {
+          status: BookingServiceCode.FailedCreateReview,
+          message: "Failed to create review",
+        };
+      }
+      const updateTransaction = await this.prisma.transaction.update({
+        where: {
+          transaction_id: reviewData.transaction_id,
+        },
+        data: {
+          status_order: BookingStatus.Completed,
+        },
+      });
+      if (!updateTransaction) {
+        return {
+          status: BookingServiceCode.FailedCreateReview,
+          message: "Failed to update transaction status",
+        };
+      }
+      return {
+        status: BookingServiceCode.BookingCreated,
+        message: "Booking review successfully",
+        createReview,
       };
     } catch (error) {
       console.log(error);
