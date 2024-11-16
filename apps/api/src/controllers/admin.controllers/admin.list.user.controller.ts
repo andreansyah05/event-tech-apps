@@ -3,7 +3,6 @@ import { listUser } from "../../services/admin.services/admin.list.user.service"
 
 export class AdminListUser {
   private listUser: listUser;
-  static getListUsers: any;
   constructor() {
     this.listUser = new listUser();
   }

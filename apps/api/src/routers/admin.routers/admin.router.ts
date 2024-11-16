@@ -15,11 +15,15 @@ const adminDashboardController = new AdminDashboardController();
 
 router.get(
   "/dashboard/total-users",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminDashboardController.getUserCount.bind(adminDashboardController)
 );
 
 router.get(
   "/dashboard/total-registration",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminDashboardController.getAnalyticMonthlyRegistration.bind(
     adminDashboardController
   )
@@ -27,50 +31,84 @@ router.get(
 
 router.get(
   "/dashboard/total-listevents",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminDashboardController.getTotalListEvents.bind(adminDashboardController)
 );
 
 router.get(
   "/dashboard/total-montly-transaction",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminDashboardController.getMonthlyTransaction.bind(adminDashboardController)
 );
 
 router.get(
   "/dashboard/total-transaction",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminDashboardController.getTotalTransaction.bind(adminDashboardController)
 );
 
 router.get(
   "/dashboard/total-transaction-value",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminDashboardController.getTotalTransactionValue.bind(
     adminDashboardController
   )
 );
 
-router.get("/events", adminController.getAllEvents.bind(adminController));
+router.get(
+  "/events",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
+  adminController.getAllEvents.bind(adminController)
+);
 
-router.get("/events/:id", adminController.getEventById.bind(adminController));
+router.get(
+  "/events/:id",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
+  adminController.getEventById.bind(adminController)
+);
 
-router.get("/list-users", adminListUser.getAllUsers.bind(adminListUser));
+router.get(
+  "/list-users",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
+  adminListUser.getAllUsers.bind(adminListUser)
+);
 
 router.post(
   "/events",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   upload.single("event_image"),
-  // eventAdminMiddleware.validateCreateEventInput.bind(eventAdminMiddleware),
+  eventAdminMiddleware.validateCreateEventInput.bind(eventAdminMiddleware),
   adminController.createEvent.bind(adminController)
 );
 
 router.put(
   "/events/:id",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   upload.single("event_image"),
   eventAdminMiddleware.validateEventUpdateInput.bind(eventAdminMiddleware),
   adminController.updateEvent.bind(adminController)
 );
 
-router.delete("/events/:id", adminController.deleteEvent.bind(adminController));
+router.delete(
+  "/events/:id",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
+  adminController.deleteEvent.bind(adminController)
+);
 
 router.get(
   "/events-search",
+  authMiddleware.validateToken.bind(authMiddleware),
+  authMiddleware.authorizeRole("admin").bind(authMiddleware),
   adminController.getEventBySearch.bind(adminController)
 );
 

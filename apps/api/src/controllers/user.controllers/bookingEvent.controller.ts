@@ -31,7 +31,11 @@ export class BookingEventController {
           data: bookingData,
         });
       } catch (error) {
-        console.log(error);
+        res.status(500).send({
+          message: "Internal Server Error",
+          detail: error,
+          status: res.statusCode,
+        });
       }
     }
   }
@@ -72,7 +76,11 @@ export class BookingEventController {
           });
         }
       } catch (error) {
-        console.log(error);
+        res.status(500).send({
+          message: "Internal Server Error",
+          detail: error,
+          status: res.statusCode,
+        });
       }
     }
   }
@@ -92,8 +100,6 @@ export class BookingEventController {
         payment_method: payment_method,
         is_paid: is_paid,
       };
-
-      console.log(bookingData);
 
       try {
         const bookingEvent =
@@ -159,7 +165,11 @@ export class BookingEventController {
           });
         }
       } catch (error) {
-        console.log(error);
+        res.status(500).send({
+          message: "Internal Server Error",
+          detail: error,
+          status: res.statusCode,
+        });
       }
     } else {
       res
@@ -210,9 +220,9 @@ export class BookingEventController {
           });
         }
       } catch (error) {
-        console.log(error);
         res.status(500).send({
           message: "Failed to update status to paid",
+          detail: error,
           status: res.statusCode,
         });
       }
@@ -283,7 +293,6 @@ export class BookingEventController {
       try {
         const reviewBooking =
           await this.bookingEventService.bookingReview(reviewData);
-        console.log(reviewBooking);
 
         if (reviewBooking?.status === BookingServiceCode.BookingCreated) {
           res.status(201).send({
@@ -331,9 +340,9 @@ export class BookingEventController {
           });
         }
       } catch (error) {
-        console.log(error);
         res.status(500).send({
           message: "Failed to create review",
+          detail: error,
           status: res.statusCode,
         });
       }

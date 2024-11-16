@@ -20,7 +20,6 @@ export class ReferralContoller {
         status: res.statusCode,
       });
     } else {
-      console.log("response:", response);
       res.status(400).send({
         message: "Invalid referral code or token",
         detailMessage: response,

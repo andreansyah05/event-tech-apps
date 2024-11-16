@@ -17,7 +17,8 @@ router.get(
   authController.refreshAccessToken.bind(authController)
 );
 router.put(
-  "/logout-user/:user_id",
+  "/logout-user",
+  authMiddleware.validateToken.bind(authMiddleware),
   authController.logoutUser.bind(authController)
 );
 router.get(

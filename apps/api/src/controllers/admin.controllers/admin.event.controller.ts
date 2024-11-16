@@ -4,7 +4,6 @@ import { CreateEvent, Discount, Event } from "../../models/admin.interface";
 
 export class AdminController {
   private adminService: AdminService;
-  getListUsers: any;
   constructor() {
     this.adminService = new AdminService();
   }
@@ -30,7 +29,6 @@ export class AdminController {
 
   async getEventById(req: Request, res: Response) {
     const id = Number(req.params.id); // Mengambil ID dari parameter URL dan mengonversinya ke Number
-    console.log("test id:", id);
     const event = await this.adminService.getEventById(Number(id)); // Mengambil event berdasarkan ID
     if (event) {
       // Jika event ditemukan, kirim respon dengan status 200
@@ -50,7 +48,6 @@ export class AdminController {
   }
 
   async createEvent(req: Request, res: Response) {
-    console.log("req create:", req);
     try {
       const {
         categoryId,
@@ -69,7 +66,6 @@ export class AdminController {
         is_paid,
         discounted_price,
       }: CreateEvent = req.body;
-      console.log(req.body);
 
       const discountData: Discount = {
         discount_percentage: discount_percentage, // Persentase diskon
@@ -77,8 +73,7 @@ export class AdminController {
       };
 
       // untuk mengambil image sebagai file
-      const image = (req as any).file?.path || "";
-      console.log("Event Image", image);
+      const image = req.file ? req.file.path || "" : "";
 
       const updateEventData: Event = {
         event_name: event_name,
@@ -94,8 +89,6 @@ export class AdminController {
         is_paid: is_paid === "true" ? true : false, // Apakah acara ini bayar atau gratis
         event_image: image, // Gambar acara
       };
-      console.log("updated", updateEventData);
-      console.log("discount data", discountData);
 
       const createdEvent = await this.adminService.createEvent(
         updateEventData,
@@ -110,7 +103,6 @@ export class AdminController {
         });
       }
     } catch (error) {
-      console.log(error);
       res.status(400).send({
         message: "Failed to create event", // Pesan error
         status: res.statusCode, // Menyertakan status kode dari respon
@@ -120,7 +112,6 @@ export class AdminController {
   }
   // Fungsi untuk menangani request update event
   async updateEvent(req: Request, res: Response) {
-    console.log("ini adakah req :", req);
     try {
       // Mengambil event_id dari parameter URL
       const event_id = Number(req.params.id); // Mendapatkan event_id dari URL
@@ -144,11 +135,8 @@ export class AdminController {
         discountId,
       }: CreateEvent = req.body;
 
-      console.log("ini reqbody guys:", req.body);
-
       // Menyediakan file image jika ada
-      const image = (req as any).file?.path || ""; // Mengambil path image yang diupload
-      console.log("Event Image", image);
+      const image = req.file ? req.file.path || "" : "";
 
       // Menyiapkan data untuk update event
       const updateEventData: Event = {
@@ -164,9 +152,6 @@ export class AdminController {
         is_paid: is_paid === "true" ? true : false,
         event_image: image,
       };
-
-      console.log("Updated Event Data:", updateEventData);
-      console.log("Discount percentage:", discount_percentage); // Log untuk debugging, menampilkan persentase diskon
 
       // Panggil service untuk memperbarui event dan diskon
       const updatedEvent = await this.adminService.updateEvent(
@@ -191,7 +176,6 @@ export class AdminController {
         });
       }
     } catch (error) {
-      console.log(error);
       res.status(400).send({
         message: "Failed to update event",
         status: res.statusCode,
@@ -202,7 +186,6 @@ export class AdminController {
 
   async deleteEvent(req: Request, res: Response) {
     const id = Number(req.params.id); // Mengambil ID dari parameter URL dan mengonversinya ke Number
-    console.log("kok missing teerus anjing :", id); // Log untuk debugging, menampilkan ID event yang akan dihapus
 
     // Menghapus event menggunakan adminService
     const deletedEvent = await this.adminService.deleteEvent(id);
