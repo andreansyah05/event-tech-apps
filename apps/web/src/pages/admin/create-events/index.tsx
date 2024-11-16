@@ -3,10 +3,13 @@ import { useRouter } from "next/router";
 import { CreateEventAdmin } from "@/utils/Create-event-admin";
 import { CreateEvent } from "@/models/createevent";
 import Swal from "sweetalert2";
-import axios from "axios";
+import NavigationBar from "@/components/NavigationBar";
+import { useAuth } from "@/utils/userContext";
 
 function CreateEventForm() {
   const router = useRouter();
+  const { user, isLogin, isLoading } = useAuth();
+
   const [formData, setFormData] = useState<CreateEvent>({
     event_name: "",
     event_image: "",
@@ -270,392 +273,432 @@ function CreateEventForm() {
     }
   };
 
+  function handleUnAuthorized() {
+    Swal.fire({
+      title: "You need to login as admin!",
+      icon: "error",
+      confirmButtonText: "Back to login",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/auth";
+      }
+    });
+  }
+  useEffect(() => {
+    console.log(isLoading);
+    if (!isLoading) {
+      console.log("execute if user are admin");
+      if (user?.user_role === "admin") {
+        // Do nothing
+      } else {
+        console.log("execute if user are not admin");
+        handleUnAuthorized();
+      }
+    }
+  }, [isLoading]);
+
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <div className="bg-gray-100">
-          <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6">CREATE NEW EVENT</h1>
+      <NavigationBar userRole="admin" isLogin={isLogin} />
+      {user?.user_role === "admin" ? (
+        <form onSubmit={handleSubmit}>
+          <div className="bg-gray-100">
+            <div className="container mx-auto p-6">
+              <h1 className="text-3xl font-bold mb-6">CREATE NEW EVENT</h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-              {/* Event Name */}
-              <div>
-                <label
-                  htmlFor="event-title"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Event Name
-                </label>
-                <input
-                  type="text"
-                  id="event-title"
-                  name="event_name"
-                  value={formData.event_name}
-                  onChange={(e) =>
-                    handleChange({
-                      target: { name: "event_name", value: e.target.value },
-                    })
-                  }
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Ex: Tech Conference 2024"
-                />
-              </div>
-
-              {/* Event Image */}
-              <div>
-                <label
-                  htmlFor="event-image"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Event Image
-                </label>
-                <input
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      handleChange({
-                        target: {
-                          name: "event_image",
-                          value: e.target.files[0],
-                        },
-                      });
-                    }
-                  }}
-                  type="file"
-                  id="event-image"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-
-              {/* Event Quota */}
-              <div>
-                <label
-                  htmlFor="quota-event"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Quota Event
-                </label>
-                <input
-                  type="number"
-                  id="quota-event"
-                  name="event_capacity"
-                  value={formData.event_capacity}
-                  onChange={(e) =>
-                    handleChange({
-                      target: { name: "event_capacity", value: e.target.value },
-                    })
-                  }
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Ex: 25"
-                />
-              </div>
-
-              {/* Event Category */}
-              <div>
-                <label
-                  htmlFor="event-category"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Event Category
-                </label>
-                <select
-                  id="event-category"
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={(e) =>
-                    handleChange({
-                      target: { name: "categoryId", value: e.target.value },
-                    })
-                  }
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                >
-                  <option value={0}>Select Category</option>
-                  <option value={1}>Tech</option>
-                  <option value={2}>Music</option>
-                  <option value={3}>Art</option>
-                </select>
-              </div>
-
-              {/* Event Description */}
-              <div className="col-span-1 sm:col-span-2">
-                <label
-                  htmlFor="event-description"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Event Description
-                </label>
-                <textarea
-                  id="event-description"
-                  name="event_description"
-                  value={formData.event_description}
-                  onChange={(e) =>
-                    handleChange({
-                      target: {
-                        name: "event_description",
-                        value: e.target.value,
-                      },
-                    })
-                  }
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Describe the event..."
-                ></textarea>
-              </div>
-
-              {/* Paid/Free Event Radio */}
-              <div className="col-span-1 sm:col-span-2">
-                <label
-                  htmlFor="paid-or-free"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Paid Or Free Event
-                </label>
-                <div className="flex gap-4">
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      id="paidEvent"
-                      name="is_paid"
-                      checked={formData.is_paid === true}
-                      onChange={(e) =>
-                        handleChange({
-                          target: { name: "is_paid", value: true },
-                        })
-                      }
-                    />
-                    <label htmlFor="paidEvent" className="ml-2 font-medium">
-                      Paid Event
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      id="freeEvent"
-                      name="is_paid"
-                      checked={formData.is_paid === false}
-                      onChange={(e) =>
-                        handleChange({
-                          target: { name: "is_paid", value: false },
-                        })
-                      }
-                    />
-                    <label htmlFor="freeEvent" className="ml-2 font-medium">
-                      Free Event
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Event Price */}
-              {formData.is_paid && (
-                <div className="col-span-1 sm:col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                {/* Event Name */}
+                <div>
                   <label
-                    htmlFor="eventPrice"
+                    htmlFor="event-title"
                     className="block text-gray-700 font-bold mb-2"
                   >
-                    Event Price
+                    Event Name
+                  </label>
+                  <input
+                    type="text"
+                    id="event-title"
+                    name="event_name"
+                    value={formData.event_name}
+                    onChange={(e) =>
+                      handleChange({
+                        target: { name: "event_name", value: e.target.value },
+                      })
+                    }
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="Ex: Tech Conference 2024"
+                  />
+                </div>
+
+                {/* Event Image */}
+                <div>
+                  <label
+                    htmlFor="event-image"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Event Image
+                  </label>
+                  <input
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleChange({
+                          target: {
+                            name: "event_image",
+                            value: e.target.files[0],
+                          },
+                        });
+                      }
+                    }}
+                    type="file"
+                    id="event-image"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+
+                {/* Event Quota */}
+                <div>
+                  <label
+                    htmlFor="quota-event"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Quota Event
                   </label>
                   <input
                     type="number"
-                    id="eventPrice"
-                    name="event_price"
-                    value={formData.event_price}
-                    onChange={(e) =>
-                      handleChange({
-                        target: { name: "event_price", value: e.target.value },
-                      })
-                    }
-                    placeholder="Ex: 25000"
-                    className="border rounded-md px-3 py-2 w-full"
-                  />
-                </div>
-              )}
-
-              {/* Discount Percentage - Hide if Free Event */}
-              {formData.is_paid && (
-                <div className="flex gap-4 col-span-1 sm:col-span-2">
-                  <div className="flex flex-col w-full">
-                    <label
-                      htmlFor="discountPercentage"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Set Event Discount
-                    </label>
-                    <input
-                      type="number"
-                      id="discountPercentage"
-                      name="discount_percentage"
-                      value={formData.discount_percentage}
-                      onChange={(e) =>
-                        handleChange({
-                          target: {
-                            name: "discount_percentage",
-                            value: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="Discount Percentage"
-                      className="border rounded-md px-3 py-2"
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="Discount_active"
-                      name="Discount_active"
-                      onChange={(e) =>
-                        handleChange({
-                          target: {
-                            name: "Discount_active",
-                            value: e.target.checked,
-                          },
-                        })
-                      }
-                    />
-                    <label htmlFor="Discount_active" className="ml-2">
-                      Set discount to active
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {/* Event Start & End Dates */}
-              <div className="flex gap-4 col-span-1 sm:col-span-2">
-                <div className="flex flex-col w-full">
-                  <label
-                    htmlFor="eventStartDate"
-                    className="block text-gray-700 font-bold mb-2"
-                  >
-                    Set start date
-                  </label>
-                  <input
-                    type="date"
-                    id="eventStartDate"
-                    name="event_start_date"
-                    value={formData.event_start_date}
+                    id="quota-event"
+                    name="event_capacity"
+                    value={formData.event_capacity}
                     onChange={(e) =>
                       handleChange({
                         target: {
-                          name: "event_start_date",
+                          name: "event_capacity",
                           value: e.target.value,
                         },
                       })
                     }
-                    className="border rounded-md px-3 py-2"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="Ex: 25"
                   />
                 </div>
-                <div className="flex flex-col w-full">
+
+                {/* Event Category */}
+                <div>
                   <label
-                    htmlFor="eventEndDate"
+                    htmlFor="event-category"
                     className="block text-gray-700 font-bold mb-2"
                   >
-                    Set end date
+                    Event Category
                   </label>
-                  <input
-                    type="date"
-                    id="eventEndDate"
-                    name="event_end_date"
-                    value={formData.event_end_date}
+                  <select
+                    id="event-category"
+                    name="categoryId"
+                    value={formData.categoryId}
+                    onChange={(e) =>
+                      handleChange({
+                        target: { name: "categoryId", value: e.target.value },
+                      })
+                    }
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  >
+                    <option value={0}>Select Category</option>
+                    <option value={1}>Tech</option>
+                    <option value={2}>Music</option>
+                    <option value={3}>Art</option>
+                  </select>
+                </div>
+
+                {/* Event Description */}
+                <div className="col-span-1 sm:col-span-2">
+                  <label
+                    htmlFor="event-description"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Event Description
+                  </label>
+                  <textarea
+                    id="event-description"
+                    name="event_description"
+                    value={formData.event_description}
                     onChange={(e) =>
                       handleChange({
                         target: {
-                          name: "event_end_date",
+                          name: "event_description",
                           value: e.target.value,
                         },
                       })
                     }
-                    className="border rounded-md px-3 py-2"
-                  />
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="Describe the event..."
+                  ></textarea>
                 </div>
-              </div>
 
-              {/* Location Online or Offline */}
-              <div className="col-span-1 sm:col-span-2">
-                <label
-                  htmlFor="is_online"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Location Online or Offline
-                </label>
-
-                {/* Radio Button for Event Location */}
-                <div className="flex items-center space-x-4 flex-wrap">
+                {/* Paid/Free Event Radio */}
+                <div className="col-span-1 sm:col-span-2">
+                  <label
+                    htmlFor="paid-or-free"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Paid Or Free Event
+                  </label>
                   <div className="flex gap-4">
                     <div className="flex items-center">
                       <input
                         type="radio"
-                        id="is_online"
-                        name="is_online"
-                        checked={formData.is_online === true}
+                        id="paidEvent"
+                        name="is_paid"
+                        checked={formData.is_paid === true}
                         onChange={(e) =>
                           handleChange({
-                            target: { name: "is_online", value: true },
+                            target: { name: "is_paid", value: true },
                           })
                         }
                       />
-                      <label htmlFor="is_online" className="ml-2 font-medium">
-                        Online
+                      <label htmlFor="paidEvent" className="ml-2 font-medium">
+                        Paid Event
                       </label>
                     </div>
                     <div className="flex items-center">
                       <input
                         type="radio"
-                        id="is_offline"
-                        name="is_online"
-                        checked={formData.is_online === false}
+                        id="freeEvent"
+                        name="is_paid"
+                        checked={formData.is_paid === false}
                         onChange={(e) =>
                           handleChange({
-                            target: { name: "is_online", value: false },
+                            target: { name: "is_paid", value: false },
                           })
                         }
                       />
-                      <label htmlFor="is_offline" className="ml-2 font-medium">
-                        Offline
+                      <label htmlFor="freeEvent" className="ml-2 font-medium">
+                        Free Event
                       </label>
                     </div>
                   </div>
                 </div>
 
-                {/* Event Location (Tampil hanya jika Offline) */}
-                {formData.is_online === false && (
-                  <div className="col-span-1 sm:col-span-2 mt-5">
+                {/* Event Price */}
+                {formData.is_paid && (
+                  <div className="col-span-1 sm:col-span-2">
                     <label
-                      htmlFor="event-location"
+                      htmlFor="eventPrice"
                       className="block text-gray-700 font-bold mb-2"
                     >
-                      Event Location
+                      Event Price
                     </label>
-                    <textarea
-                      id="event-location"
-                      name="event_location"
-                      value={formData.event_location}
+                    <input
+                      type="number"
+                      id="eventPrice"
+                      name="event_price"
+                      value={formData.event_price}
                       onChange={(e) =>
                         handleChange({
                           target: {
-                            name: "event_location",
+                            name: "event_price",
                             value: e.target.value,
                           },
                         })
                       }
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      placeholder="Event Location"
-                    ></textarea>
+                      placeholder="Ex: 25000"
+                      className="border rounded-md px-3 py-2 w-full"
+                    />
                   </div>
                 )}
-              </div>
 
-              {/* Submit Button */}
-              <div className="col-span-1 sm:col-span-2">
-                <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                >
-                  Create Event
-                </button>
+                {/* Discount Percentage - Hide if Free Event */}
+                {formData.is_paid && (
+                  <div className="flex gap-4 col-span-1 sm:col-span-2">
+                    <div className="flex flex-col w-full">
+                      <label
+                        htmlFor="discountPercentage"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Set Event Discount
+                      </label>
+                      <input
+                        type="number"
+                        id="discountPercentage"
+                        name="discount_percentage"
+                        value={formData.discount_percentage}
+                        onChange={(e) =>
+                          handleChange({
+                            target: {
+                              name: "discount_percentage",
+                              value: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="Discount Percentage"
+                        className="border rounded-md px-3 py-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="Discount_active"
+                        name="Discount_active"
+                        onChange={(e) =>
+                          handleChange({
+                            target: {
+                              name: "Discount_active",
+                              value: e.target.checked,
+                            },
+                          })
+                        }
+                      />
+                      <label htmlFor="Discount_active" className="ml-2">
+                        Set discount to active
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Event Start & End Dates */}
+                <div className="flex gap-4 col-span-1 sm:col-span-2">
+                  <div className="flex flex-col w-full">
+                    <label
+                      htmlFor="eventStartDate"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Set start date
+                    </label>
+                    <input
+                      type="date"
+                      id="eventStartDate"
+                      name="event_start_date"
+                      value={formData.event_start_date}
+                      onChange={(e) =>
+                        handleChange({
+                          target: {
+                            name: "event_start_date",
+                            value: e.target.value,
+                          },
+                        })
+                      }
+                      className="border rounded-md px-3 py-2"
+                    />
+                  </div>
+                  <div className="flex flex-col w-full">
+                    <label
+                      htmlFor="eventEndDate"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Set end date
+                    </label>
+                    <input
+                      type="date"
+                      id="eventEndDate"
+                      name="event_end_date"
+                      value={formData.event_end_date}
+                      onChange={(e) =>
+                        handleChange({
+                          target: {
+                            name: "event_end_date",
+                            value: e.target.value,
+                          },
+                        })
+                      }
+                      className="border rounded-md px-3 py-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Location Online or Offline */}
+                <div className="col-span-1 sm:col-span-2">
+                  <label
+                    htmlFor="is_online"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Location Online or Offline
+                  </label>
+
+                  {/* Radio Button for Event Location */}
+                  <div className="flex items-center space-x-4 flex-wrap">
+                    <div className="flex gap-4">
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          id="is_online"
+                          name="is_online"
+                          checked={formData.is_online === true}
+                          onChange={(e) =>
+                            handleChange({
+                              target: { name: "is_online", value: true },
+                            })
+                          }
+                        />
+                        <label htmlFor="is_online" className="ml-2 font-medium">
+                          Online
+                        </label>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          id="is_offline"
+                          name="is_online"
+                          checked={formData.is_online === false}
+                          onChange={(e) =>
+                            handleChange({
+                              target: { name: "is_online", value: false },
+                            })
+                          }
+                        />
+                        <label
+                          htmlFor="is_offline"
+                          className="ml-2 font-medium"
+                        >
+                          Offline
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Event Location (Tampil hanya jika Offline) */}
+                  {formData.is_online === false && (
+                    <div className="col-span-1 sm:col-span-2 mt-5">
+                      <label
+                        htmlFor="event-location"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Event Location
+                      </label>
+                      <textarea
+                        id="event-location"
+                        name="event_location"
+                        value={formData.event_location}
+                        onChange={(e) =>
+                          handleChange({
+                            target: {
+                              name: "event_location",
+                              value: e.target.value,
+                            },
+                          })
+                        }
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="Event Location"
+                      ></textarea>
+                    </div>
+                  )}
+                </div>
+
+                {/* Submit Button */}
+                <div className="col-span-1 sm:col-span-2">
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                  >
+                    Create Event
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      ) : (
+        ""
+      )}
     </>
   );
 }

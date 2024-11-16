@@ -24,6 +24,11 @@ export interface RegisterForm {
   role?: "user";
 }
 
+export enum UniqueCode {
+  USER = "ussr",
+  ADMIN = "ussad",
+}
+
 export interface EventCardProps {
   event_id: number | string;
   event_name: string; // Nama acara
@@ -67,6 +72,12 @@ export enum BookingServiceCode {
   Unauthorized = "UT",
 }
 
+export enum BookingStatus {
+  Canceled = "Canceled",
+  WaitingForPayment = "Waiting Payment",
+  Paid = "Paid",
+  Completed = "Completed",
+}
 export interface TransactionPageProps {
   transaction_id: number;
   event_image: string; // URL gambar acara
@@ -81,4 +92,12 @@ export interface TransactionPageProps {
   status_order: string;
   event_location: string;
   payment_method: string;
+}
+
+export interface ReviewData {
+  transaction_id: number;
+  eventId: number;
+  review_content: string;
+  review_rating: number;
+  isAttend: boolean;
 }

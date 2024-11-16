@@ -7,6 +7,7 @@ import cors from "cors";
 import adminRouter from "./routers/admin.routers/admin.router";
 import userRouter from "./routers/user.routers/user.router";
 import bookingEventRouter from "./routers/user.routers/bookingEvent.router";
+import authAdminRouter from "./routers/admin.routers/auth.router";
 
 environment.config();
 
@@ -24,6 +25,7 @@ app.get("/api", featureRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/referral", referralRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/auth-admin", authAdminRouter);
 app.use("/api/users", userRouter);
 
 app.use("/api/bookings", bookingEventRouter);

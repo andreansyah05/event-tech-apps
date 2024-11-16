@@ -10,8 +10,6 @@ import { useAuth } from "@/utils/userContext";
 import LoadingEventDetail from "./loading";
 import { formatDate } from "@/utils/formatter/formatDate";
 import BookingModal from "@/components/BookingModal";
-import Overlay from "@/components/Overlay";
-import MultiPurposeModal, { ModalProps } from "@/components/MultiPurposeModal";
 
 function DetailEvent() {
   const { isLogin, user } = useAuth();
@@ -121,7 +119,7 @@ function DetailEvent() {
             />
             <div className="flex flex-col gap-6 bg-white lg:p-5">
               <div id="header">
-                <Chips text={event?.category_name as string} />
+                <Chips type="CATEGORY" text={event?.category_name as string} />
                 <h1 className="text-3xl font-bold uppercase">
                   {event?.event_name}
                 </h1>

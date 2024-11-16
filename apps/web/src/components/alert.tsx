@@ -9,7 +9,7 @@ function Toast({ type, showToast, highlightText, text }: Toast) {
   switch (type) {
     case "SUCCESS":
       return (
-        <div className="px-4 fixed top-10 z-[100] md:left-1/2 md:transform md:-translate-x-1/2">
+        <div className="px-4 fixed top-10 z-[150] md:left-1/2 md:transform md:-translate-x-1/2">
           <div
             className={`w-full p-4  rounded-lg bg-green-50 ${
               showToast
@@ -27,7 +27,7 @@ function Toast({ type, showToast, highlightText, text }: Toast) {
 
     case "FAILED":
       return (
-        <div className="px-4 fixed top-10 z-[100] md:left-1/2 md:transform md:-translate-x-1/2">
+        <div className="px-4 fixed top-10 z-[150] md:left-1/2 md:transform md:-translate-x-1/2">
           <div
             className={`w-full p-4 rounded-lg bg-red-50 md:w-fit ${
               showToast

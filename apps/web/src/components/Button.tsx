@@ -27,6 +27,7 @@ function Button({
         case "primary":
           return (
             <button
+              type="submit"
               onClick={onClick}
               disabled={isButtonDisable}
               className={`${width} font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
@@ -38,6 +39,7 @@ function Button({
         case "primary-border":
           return (
             <button
+              onClick={onClick}
               disabled={isButtonDisable}
               className={`${width} font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >

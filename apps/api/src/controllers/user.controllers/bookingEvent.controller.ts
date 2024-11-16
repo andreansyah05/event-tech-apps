@@ -3,6 +3,7 @@ import { BookingEventService } from "../../services/user.services/bookingEvent.s
 import {
   BookingData,
   BookingServiceCode,
+  ReviewData,
 } from "../../models/booking.interface";
 import { AuthUtils } from "../../utils/auth.utils";
 
@@ -254,6 +255,88 @@ export class BookingEventController {
           });
         }
       } catch (error) {}
+    }
+  }
+
+  async bookingReview(req: Request, res: Response) {
+    // Decoded Token
+    const decodedToken = await this.authUtils.getAuthenticatedUser(req);
+
+    if (decodedToken) {
+      const {
+        eventId,
+        isAttend,
+        review_content,
+        review_rating,
+        transaction_id,
+      }: ReviewData = req.body;
+
+      const reviewData: ReviewData = {
+        transaction_id: transaction_id,
+        userId: decodedToken.user_id,
+        eventId: eventId,
+        review_content: review_content,
+        review_rating: review_rating,
+        isAttend: isAttend,
+      };
+
+      try {
+        const reviewBooking =
+          await this.bookingEventService.bookingReview(reviewData);
+        console.log(reviewBooking);
+
+        if (reviewBooking?.status === BookingServiceCode.BookingCreated) {
+          res.status(201).send({
+            message: reviewBooking.message,
+            status: res.statusCode,
+            data: reviewBooking.createReview,
+          });
+        } else if (
+          reviewBooking?.status === BookingServiceCode.NoTransactionFound
+        ) {
+          res.status(404).send({
+            message: reviewBooking.message,
+            status: res.statusCode,
+          });
+        } else if (
+          reviewBooking?.status === BookingServiceCode.TransactionisPaid
+        ) {
+          res.status(409).send({
+            message: reviewBooking.message,
+            status: res.statusCode,
+          });
+        } else if (
+          reviewBooking?.status === BookingServiceCode.EventNotStartYet
+        ) {
+          res.status(409).send({
+            message: reviewBooking.message,
+            status: res.statusCode,
+          });
+        } else if (reviewBooking?.status === BookingServiceCode.Unauthorized) {
+          res.status(403).send({
+            message: reviewBooking.message,
+            status: res.statusCode,
+          });
+        } else if (
+          reviewBooking?.status === BookingServiceCode.FailedCreateReview
+        ) {
+          res.status(500).send({
+            message: reviewBooking.message,
+            status: res.statusCode,
+          });
+        } else {
+          res.status(500).send({
+            message: "Failed to create review",
+            status: res.statusCode,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({
+          message: "Failed to create review",
+          status: res.statusCode,
+        });
+      }
     }
   }
 }

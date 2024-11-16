@@ -48,7 +48,7 @@ function EventCard({
       <div className="p-4 lg:w-full lg:flex lg:items-center">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:w-full">
           <div>
-            <Chips text={category_name} />
+            <Chips type="CATEGORY" text={category_name} />
             <h2 className="text-lg font-bold text-gray-950 uppercase mb-4 lg:text-xl">
               {event_name}
             </h2>

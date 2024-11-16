@@ -14,6 +14,7 @@ interface AuthContextProps {
   userLogout: () => void;
   updateUserPoint: (referralCode: string) => void;
   decreseUserPoint: (point: number) => void;
+  setLoading: (isLoading: boolean) => void;
 }
 
 // Create Context and define the default value
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextProps>({
   isLogin: false,
   isLoading: false,
   user: null,
+  setLoading: () => {},
   userLogin: () => {},
   userLogout: () => {},
   updateUserPoint: () => {},
@@ -30,7 +32,7 @@ const AuthContext = createContext<AuthContextProps>({
 export function AuthProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<UserProps | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   function userLogin(userData: UserProps | null) {
     if (userData) {
@@ -66,6 +68,9 @@ export function AuthProvider({ children }: UserProviderProps) {
       });
     }
   }
+  function setLoading(loadingState: boolean) {
+    setIsLoading(loadingState);
+  }
 
   return (
     <AuthContext.Provider
@@ -77,6 +82,7 @@ export function AuthProvider({ children }: UserProviderProps) {
         isLoading,
         updateUserPoint,
         decreseUserPoint,
+        setLoading,
       }}
     >
       {children}

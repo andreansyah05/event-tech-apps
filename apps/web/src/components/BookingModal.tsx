@@ -15,6 +15,7 @@ import Cookies from "js-cookie";
 import AlertToast, { Toast } from "./alert";
 import Overlay from "./Overlay";
 import MultiPurposeModal, { ModalProps } from "./MultiPurposeModal";
+import { UniqueCode } from "@/models/models";
 
 interface BookingModalProps {
   event_id: number;
@@ -53,7 +54,7 @@ function BookingModal({
   const [showDelayedModal, setShowDelayedModal] = useState<boolean>(false);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
-  const token = Cookies.get("access_token");
+  const token = Cookies.get(`access${UniqueCode.USER}_token`);
   const [toast, setToast] = useState<Toast>({
     highlightText: "",
     text: "",
@@ -68,7 +69,7 @@ function BookingModal({
     subTitle: `Congratulations! You've successfully booked your spot for ${event_name}. We're excited to have you join us!`,
     primaryButton: {
       text: "View Order",
-      href: "/event/35",
+      href: "/user/transaction-history",
     },
     secondaryButton: {
       text: "Explore More Event",
@@ -99,6 +100,7 @@ function BookingModal({
         bookingData,
         token as string
       );
+      console.log(bookingResult);
       if (bookingResult.status === 201 || bookingResult.status === 200) {
         // handle success booking
         if (isPaid) {

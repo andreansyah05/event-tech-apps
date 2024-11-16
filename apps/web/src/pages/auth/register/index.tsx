@@ -1,17 +1,17 @@
 import { RegisterForm } from "@/models/models";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AuthHandler } from "@/utils/authValidation";
 import ToastAlert, { Toast } from "@/components/alert";
 
 import Button from "@/components/Button";
 import Link from "next/link";
-import { redirectIfLogin } from "@/utils/redirectIfLogin";
+// Import useRouter from next/router
 
 function RegisterPage() {
-  // Check if the user already login or not
-  redirectIfLogin();
-
   const authHandler = new AuthHandler();
+  // Check if the user already login or not
+  authHandler.redirectIfUserLogin();
+
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [toast, setToast] = useState<Toast>({
@@ -110,6 +110,7 @@ function RegisterPage() {
   useEffect(() => {
     setIsButtonDisabled(authHandler.handleRegistrationValidation(formData));
   }, [formData.email, formData.password, formData.name]);
+
   return (
     <>
       <ToastAlert

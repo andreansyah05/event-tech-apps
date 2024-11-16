@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { LoginAuth } from "@/models/models";
 import { AuthHandler } from "@/utils/authValidation";
-
+import ToastAlert, { Toast } from "@/components/alert";
 import Button from "@/components/Button";
-import Link from "next/link";
 
 function AdminLogin() {
   // Membuat instance dari AuthHandler untuk menangani proses autentikasi
   const authHandler = new AuthHandler();
 
+  const [isLoading, setIsLoading] = useState(false); // Track data loading state
   // State untuk menyimpan data form (email dan password) dengan tipe LoginAuth
   const [formData, setFormData] = useState<LoginAuth>({
     email: "",
     password: "",
+  });
+  // Toast State
+  const [toast, setToast] = useState<Toast>({
+    highlightText: "",
+    text: "",
+    type: "FAILED",
+    showToast: false,
   });
 
   // State untuk mengontrol apakah tombol login dinonaktifkan
@@ -41,11 +48,42 @@ function AdminLogin() {
   // Fungsi untuk menangani submit form login
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Mencegah reload halaman setelah submit
-    const response = await authHandler.handleSubmitData(formData);
-    if (response) {
+    setIsLoading(true);
+    const response = await authHandler.handleSubmitData(formData, "admin");
+    if (response.status === 200) {
       // Jika response status 200, maka user berhasil login
       // Redirect ke halaman admin
+      setToast({
+        highlightText: "Login Success",
+        text: "redirect you to admin dashboard",
+        type: "SUCCESS",
+        showToast: true,
+      });
+      // Redirect ke halaman admin dashboard
+      //
       window.location.href = "/admin/dashboard";
+    } else if (response.status === 401) {
+      setToast({
+        highlightText: "Invalid Email or Password",
+        text: "Please check your email or password",
+        type: "FAILED",
+        showToast: true,
+      });
+      setIsLoading(false);
+      setTimeout(() => {
+        setToast({ ...toast, showToast: false });
+      }, 1500);
+    } else if (response.status === 403) {
+      setToast({
+        highlightText: "You are not authorized to access this page",
+        text: "Please contact your administrator",
+        type: "FAILED",
+        showToast: true,
+      });
+      setIsLoading(false);
+      setTimeout(() => {
+        setToast({ ...toast, showToast: false });
+      }, 1500);
     }
     // Mengirim data form ke fungsi handleSubmitData di AuthHandler
   };
@@ -56,6 +94,12 @@ function AdminLogin() {
 
   return (
     <>
+      <ToastAlert
+        type={toast.type}
+        highlightText={toast.highlightText}
+        text={toast.text}
+        showToast={toast.showToast}
+      />
       <div className="p-4 md:flex md:h-screen md:justify-center md:items-center">
         <div className="max-w-screen-sm mx-auto p-5 border border-zinc-200 rounded bg-white md:p-10">
           {/* Judul form login */}
@@ -101,6 +145,7 @@ function AdminLogin() {
               type="primary"
               text="Login"
               isButtonDisable={isButtonDisabled} // Mengontrol aktif/tidaknya tombol login
+              isLoading={isLoading}
             />
           </form>
         </div>

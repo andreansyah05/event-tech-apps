@@ -2,28 +2,28 @@ export function formatDate(dateString: string): string {
   // Parse the input date string into a Date object
   const date = new Date(dateString);
 
-  const dateOfMoth = date.getDay();
+  const dateOfMoth = date.getDate();
 
   // Get the day of the week (0-6, where 0 is Sunday)
   const dayOfWeek = date.getDay();
 
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // Get the month name (0-11, where 0 is January)
   const month = date.getMonth();
   const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
     "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   // Get the year

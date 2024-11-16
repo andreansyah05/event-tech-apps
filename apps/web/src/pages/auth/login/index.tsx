@@ -5,17 +5,16 @@ import { AuthHandler } from "@/utils/authValidation";
 import Button from "@/components/Button";
 import Link from "next/link";
 import { useAuth } from "@/utils/userContext";
-import { redirectIfLogin } from "@/utils/redirectIfLogin";
 import ToastAlert, { Toast } from "@/components/alert";
 
 function LoginPage() {
+  const authHandler = new AuthHandler();
   // Check if the user already login or not
-  redirectIfLogin();
+  authHandler.redirectIfUserLogin();
 
   const router = useRouter();
   const { userLogin } = useAuth();
 
-  const authHandler = new AuthHandler();
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(false); // Track data loading state
@@ -52,7 +51,7 @@ function LoginPage() {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const response = await authHandler.handleSubmitData(formData);
+      const response = await authHandler.handleSubmitData(formData, "user");
       console.log("Respone Handle Submit : ", response);
       if (response?.status === 200) {
         console.log("status === 200");

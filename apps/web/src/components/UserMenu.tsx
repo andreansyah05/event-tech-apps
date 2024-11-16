@@ -1,20 +1,12 @@
 import Link from "next/link";
-import { useAuth } from "@/utils/userContext";
-import Cookies from "js-cookie";
 import { useState } from "react";
 
-function UserMenu() {
-  const { userLogout } = useAuth();
-  const [hideMenu, setHideMenu] = useState<boolean>(true);
+interface UserMenu {
+  userLogout: (scope: "user" | "admin") => void;
+}
 
-  // Add logout functionality here using userLogout hook
-  function handleLogout() {
-    setHideMenu(true);
-    userLogout();
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
-    window.location.href = "/"; // Replace '/' with your desired URL
-  }
+function UserMenu({ userLogout }: UserMenu) {
+  const [hideMenu, setHideMenu] = useState<boolean>(true);
 
   return !hideMenu ? (
     <></>
@@ -30,8 +22,16 @@ function UserMenu() {
           </Link>
         </li>
         <li>
+          <Link
+            href="/user/transaction-history"
+            className="text-left p-2 text-gray-950 inline-block rounded-md w-full hover:bg-gray-100 "
+          >
+            My Bookings
+          </Link>
+        </li>
+        <li>
           <button
-            onClick={handleLogout}
+            onClick={() => userLogout("user")}
             className="rounded-md text-left p-2 text-gray-950  hover:bg-gray-100 w-full"
           >
             Logout
