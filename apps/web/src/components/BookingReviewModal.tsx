@@ -173,7 +173,7 @@ function BookingReviewModal({
                 )}
               </div>
             </div>
-            <div className="flex flex-col flex-col-reverse gap-4 md:flex-row md:gap-8 justify-center">
+            <div className="flex flex-col-reverse gap-4 md:flex-row md:gap-8 justify-center">
               <Button
                 isButton={true}
                 text="Close"
