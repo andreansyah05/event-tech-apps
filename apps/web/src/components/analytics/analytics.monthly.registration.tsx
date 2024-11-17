@@ -88,7 +88,7 @@ const MyBarChartTransaction = () => {
             labels: chartData.map((item) => item.month), // Menggunakan nama bulan
             datasets: [
               {
-                label: "Total Sales",
+                label: "Total Register",
                 data: chartData.map((item) => item.count),
                 backgroundColor: "rgba(255, 99, 132, 0.2)",
                 borderColor: "rgba(255, 99, 132, 1)",
@@ -121,7 +121,7 @@ const MyBarChartTransaction = () => {
             plugins: {
               title: {
                 display: true,
-                text: "Total Sales Registration per Month",
+                text: "Registration per Month",
                 color: "white", // Mengganti warna font title menjadi putih
                 font: {
                   size: 16, // Ukuran font title
