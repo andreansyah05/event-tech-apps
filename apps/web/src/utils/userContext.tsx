@@ -1,5 +1,6 @@
 import { useContext, createContext, useState } from "react";
 import { LoginAuth, UserProps } from "@/models/models";
+import { AuthHandler } from "./authValidation";
 
 // Define the interface
 interface UserProviderProps {
@@ -11,7 +12,7 @@ interface AuthContextProps {
   isLogin: boolean;
   isLoading: boolean;
   userLogin: (userData: UserProps | null) => void;
-  userLogout: () => void;
+  userLogout: (token: string) => void;
   updateUserPoint: (referralCode: string) => void;
   decreseUserPoint: (point: number) => void;
   setLoading: (isLoading: boolean) => void;
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<UserProps | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const authHandler = new AuthHandler();
 
   function userLogin(userData: UserProps | null) {
     if (userData) {
@@ -44,7 +46,8 @@ export function AuthProvider({ children }: UserProviderProps) {
     }
   }
 
-  function userLogout() {
+  function userLogout(token: string) {
+    authHandler.handleUserLogout(token);
     setUser(null);
     setIsLogin(false);
   }

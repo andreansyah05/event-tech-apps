@@ -1,12 +1,16 @@
 import axios from "axios";
 
-export const CreateEventAdmin = async (formData: any) => {
-  const discountPercentage = formData.discounted_price;
-  const is_active = formData.is_active;
-
+export const CreateEventAdmin = async (
+  formData: FormData,
+  adminToken: string
+) => {
   console.log("inputd data : ", formData);
   try {
-    const response = await axios.post("/api/admin/events", formData);
+    const response = await axios.post("/api/admin/events", formData, {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    });
 
     return response.data; // Mengembalikan data dari response
   } catch (error) {

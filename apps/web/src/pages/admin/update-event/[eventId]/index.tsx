@@ -6,14 +6,22 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import NavigationBar from "@/components/NavigationBar";
 import { useAuth } from "@/utils/userContext";
+import { EventHandlerApi } from "@/utils/eventHandler";
+import Cookies from "js-cookie";
+import { UniqueCode } from "@/models/models";
+import { Category } from "@/models/categoryList";
 
 function UpdateEvents() {
+  const adminToken = Cookies.get(`access${UniqueCode.ADMIN}_token`);
+  const eventHandler = new EventHandlerApi();
   const router = useRouter();
+
   // const { eventId } = router.query;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [event_id, setEventId] = useState(0);
   const { user, isLogin, isLoading } = useAuth();
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
 
   const [formData, setFormData] = useState<UpdateEvent>({
     event_name: "",
@@ -40,6 +48,15 @@ function UpdateEvents() {
       [name]: value,
     }));
   };
+
+  async function handleFetchCategory() {
+    try {
+      const response = await eventHandler.getAllCategories();
+      setCategoryList(response.data);
+    } catch (error) {
+      return error;
+    }
+  }
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -191,13 +208,15 @@ function UpdateEvents() {
     console.log("ini data:", data);
 
     try {
-      await UpdateEventAdmin(data, event_id).then((response) => {
-        if (response) {
-          console.log(response);
-          alert("Event berhasil update!");
-          router.push("/admin/list-events");
-        }
-      });
+      await eventHandler
+        .updateEvent(data, event_id, adminToken as string)
+        .then((response) => {
+          if (response) {
+            console.log(response);
+            alert("Event berhasil update!");
+            router.push("/admin/list-events");
+          }
+        });
     } catch (error) {
       alert("Terjadi kesalahan: ");
     }
@@ -227,6 +246,7 @@ function UpdateEvents() {
       if (user?.user_role === "admin") {
         const fetchEvent = async () => {
           try {
+            handleFetchCategory();
             const response = await axios.get(`/api/admin/events/${eventId}`);
             const data = response.data.data;
             console.log(response);
@@ -381,9 +401,13 @@ function UpdateEvents() {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
                     <option value={0}>Select Category</option>
-                    <option value={1}>Tech</option>
-                    <option value={2}>Music</option>
-                    <option value={3}>Art</option>
+                    {categoryList.map((category: Category, index: number) => {
+                      return (
+                        <option key={index} value={category.category_id}>
+                          {category.category_name}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -399,6 +423,7 @@ function UpdateEvents() {
                     id="event-description"
                     name="event_description"
                     value={formData.event_description}
+                    rows={6}
                     onChange={(e) =>
                       handleChange({
                         target: {
@@ -407,7 +432,7 @@ function UpdateEvents() {
                         },
                       })
                     }
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="resize-none shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="Describe the event..."
                   ></textarea>
                 </div>

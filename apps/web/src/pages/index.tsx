@@ -4,6 +4,7 @@ import ListLogo from "@/components/section/ListLogoSection";
 import EventListSection from "@/components/section/EventListSection";
 import { useAuth } from "@/utils/userContext";
 import ReferralSection from "@/components/section/ReferralSection";
+import Header from "@/components/Header";
 
 function Home() {
   const { user, isLogin } = useAuth();
@@ -17,6 +18,13 @@ function Home() {
         point={user?.points}
         name={user?.name}
       />
+      <Header>
+        <title>Home | Find latest tech event</title>
+        <meta
+          name="description"
+          content="Find the latest tech events and stay updated on the hottest conferences, workshops, and exhibitions. Discover exciting opportunities to learn, network, and innovate."
+        />
+      </Header>
 
       <section
         id="heroSection"

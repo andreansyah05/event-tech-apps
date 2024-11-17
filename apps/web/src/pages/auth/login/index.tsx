@@ -6,6 +6,7 @@ import Button from "@/components/Button";
 import Link from "next/link";
 import { useAuth } from "@/utils/userContext";
 import ToastAlert, { Toast } from "@/components/alert";
+import Header from "@/components/Header";
 
 function LoginPage() {
   const authHandler = new AuthHandler();
@@ -51,6 +52,7 @@ function LoginPage() {
     e.preventDefault();
     try {
       setIsLoading(true);
+      setIsButtonDisabled(true);
       const response = await authHandler.handleSubmitData(formData, "user");
       console.log("Respone Handle Submit : ", response);
       if (response?.status === 200) {
@@ -66,6 +68,7 @@ function LoginPage() {
           showToast: true,
         });
         setIsLoading(false);
+        setIsButtonDisabled(false);
         setTimeout(() => {
           setToast({ ...toast, showToast: false });
         }, 1500);
@@ -81,6 +84,9 @@ function LoginPage() {
 
   return (
     <>
+      <Header>
+        <title>Login Page</title>
+      </Header>
       <ToastAlert
         type={toast.type}
         highlightText={toast.highlightText}
@@ -115,7 +121,7 @@ function LoginPage() {
                 type="password"
                 id="password"
                 className="bg-zinc-100 hover:bg-zinc-200 transition-all	 text-gray-900 text-sm rounded-sm  block w-full p-3 "
-                placeholder="Min 8 characters"
+                placeholder="Min 6 characters"
                 value={formData.password}
                 onChange={handleChangePassword}
                 required

@@ -13,12 +13,15 @@ import Button from "@/components/Button";
 import MultiPurposeModal, { ModalProps } from "@/components/MultiPurposeModal";
 import Overlay from "@/components/Overlay";
 import { UniqueCode } from "@/models/models";
+import Header from "@/components/Header";
 
 function WaitingPaymentPage() {
   const userToken = Cookies.get(`access${UniqueCode.USER}_token`);
   const bookingHandler = new BookingHandler();
   const router = useRouter();
   const { isLogin, user } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isButtonDisable, setIsButtonDisable] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showDelayedModal, setShowDelayedModal] = useState<boolean>(false);
   const [transaction, setTransaction] = useState<TransactionPageProps | null>(
@@ -92,6 +95,8 @@ function WaitingPaymentPage() {
 
   async function handleConfirmPayment(): Promise<void> {
     try {
+      setIsButtonDisable(true); // Disable the button when the payment is processing
+      setIsLoading(true);
       const response = await bookingHandler.updateStatusToPaid(
         Number(transaction?.transaction_id),
         userToken as string
@@ -101,6 +106,7 @@ function WaitingPaymentPage() {
         // Redirect to transaction history after successfull payment
         // 1. Show success modal when the payment its success
         // 2. User able to go to transaction page or explore other event
+        setIsLoading(false);
         setShowModal(!showModal);
       }
     } catch (error) {
@@ -133,6 +139,9 @@ function WaitingPaymentPage() {
 
   return (
     <>
+      <Header>
+        <title>Waiting Payment</title>
+      </Header>
       <NavigationBar
         isLogin={isLogin}
         userRole="user"
@@ -234,6 +243,8 @@ function WaitingPaymentPage() {
                   text="Confirm Payment"
                   type="primary"
                   width="w-fit"
+                  isLoading={isLoading}
+                  isButtonDisable={isButtonDisable}
                   onClick={handleConfirmPayment}
                 />
               </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Loader from "./Loader";
 
 interface ButtonProps {
   isButton: boolean;
@@ -30,9 +31,9 @@ function Button({
               type="submit"
               onClick={onClick}
               disabled={isButtonDisable}
-              className={`${width} font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} flex items-center justify-center font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >
-              {isLoading ? "Loading..." : text}
+              {isLoading ? <Loader /> : text}
             </button>
           );
 
@@ -41,9 +42,9 @@ function Button({
             <button
               onClick={onClick}
               disabled={isButtonDisable}
-              className={`${width} font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} flex items-center justify-center font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >
-              {isLoading ? "Loading..." : text}{" "}
+              {isLoading ? <Loader /> : text}
             </button>
           );
 
@@ -52,9 +53,9 @@ function Button({
             <button
               onClick={onClick}
               disabled={isButtonDisable}
-              className={`${width} font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} flex items-center justify-center font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
             >
-              {isLoading ? "Loading..." : text}{" "}
+              {isLoading ? <Loader /> : text}
             </button>
           );
 
@@ -62,9 +63,9 @@ function Button({
           return (
             <button
               disabled={isButtonDisable}
-              className={`${width} font-bold py-3 px-4 bg-white bg-opacity-25 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} flex items-center justify-center font-bold py-3 px-4 bg-white bg-opacity-25 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >
-              {isLoading ? "Loading..." : text}{" "}
+              {isLoading ? <Loader /> : text}
             </button>
           );
       }
@@ -74,7 +75,7 @@ function Button({
           return (
             <Link
               href={href as string}
-              className={`${width} inline-block font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} inline-block font-bold py-3 px-4 bg-indigo-600 rounded-sm text-white transition-all	 hover:bg-indigo-800 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >
               {text}
             </Link>
@@ -84,7 +85,7 @@ function Button({
           return (
             <Link
               href={href as string}
-              className={`${width} inline-block font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} inline-block font-bold py-3 px-4 bg-indigo-100  rounded-sm text-indigo-800 transition-all	 hover:bg-indigo-200 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-600" : ""}`}
             >
               {text}
             </Link>
@@ -94,7 +95,7 @@ function Button({
           return (
             <Link
               href={href as string}
-              className={`${width} inline-block font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
+              className={`${width} ${width === "w-fit" ? "shrink-0" : "shrink"} inline-block font-bold py-3 px-4 bg-white rounded-sm text-indigo-600 transition-all	 hover:bg-indigo-100 h-fit text-center ${isButtonDisable ? "opacity-40 hover:bg-indigo-100" : ""}`}
             >
               {text}
             </Link>

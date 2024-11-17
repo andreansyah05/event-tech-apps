@@ -10,6 +10,7 @@ import { useAuth } from "@/utils/userContext";
 import LoadingEventDetail from "./loading";
 import { formatDate } from "@/utils/formatter/formatDate";
 import BookingModal from "@/components/BookingModal";
+import Header from "@/components/Header";
 
 function DetailEvent() {
   const { isLogin, user } = useAuth();
@@ -81,6 +82,13 @@ function DetailEvent() {
 
   return (
     <>
+      <Header>
+        <title>{event.event_name}</title>
+        <meta
+          name="description"
+          content={`Discover ${event.event_name} at ${event.event_location}`}
+        />
+      </Header>
       {showBookingModal ? (
         <BookingModal
           event_id={eventId}

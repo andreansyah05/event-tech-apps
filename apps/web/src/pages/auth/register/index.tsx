@@ -5,6 +5,7 @@ import ToastAlert, { Toast } from "@/components/alert";
 
 import Button from "@/components/Button";
 import Link from "next/link";
+import Header from "@/components/Header";
 // Import useRouter from next/router
 
 function RegisterPage() {
@@ -14,6 +15,7 @@ function RegisterPage() {
 
   // Disable Button
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<Toast>({
     highlightText: "",
     text: "",
@@ -56,6 +58,8 @@ function RegisterPage() {
   //   Handle Submit Button
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsLoading(true);
+    setIsButtonDisabled(true);
     await authHandler
       .handleRegistrationUser(formData)
       .then((response) => {
@@ -84,6 +88,8 @@ function RegisterPage() {
               showToast: false,
             });
           }, 1800);
+          setIsLoading(false);
+          setIsButtonDisabled(false);
         }
       })
       .catch((error) => {
@@ -104,6 +110,8 @@ function RegisterPage() {
             });
           }, 1800);
         }
+        setIsLoading(false);
+        setIsButtonDisabled(false);
       });
   }
 
@@ -113,6 +121,9 @@ function RegisterPage() {
 
   return (
     <>
+      <Header>
+        <title>Register Page</title>
+      </Header>
       <ToastAlert
         type={toast.type}
         highlightText={
@@ -179,6 +190,7 @@ function RegisterPage() {
               type="primary"
               text="Register"
               isButtonDisable={isButtonDisabled}
+              isLoading={isLoading}
             />
           </form>
 

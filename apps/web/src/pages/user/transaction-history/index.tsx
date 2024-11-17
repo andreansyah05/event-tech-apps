@@ -11,6 +11,7 @@ import Toast from "@/components/alert";
 import EmptryTransactionSection from "@/components/section/EmptryTransactionSection";
 import BookingReviewModal from "@/components/BookingReviewModal";
 import { UniqueCode } from "@/models/models";
+import Header from "@/components/Header";
 
 function TransactionHistory() {
   const authHandler = new AuthHandler();
@@ -92,6 +93,9 @@ function TransactionHistory() {
 
   return (
     <>
+      <Header>
+        <title>Transaction History</title>
+      </Header>
       <NavigationBar
         isLogin={isLogin}
         userRole="user"
