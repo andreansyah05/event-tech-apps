@@ -1,5 +1,4 @@
 import express from "express";
-import featureRouter from "./routers/feature.router";
 import environment from "dotenv";
 import authRouter from "./routers/user.routers/auth.router";
 import referralRouter from "./routers/user.routers/referral.router";
@@ -21,7 +20,6 @@ app.use(
   })
 );
 // jalur utama dari api
-app.get("/api", featureRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/referral", referralRouter);
 app.use("/api/admin", adminRouter);

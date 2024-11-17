@@ -31,12 +31,6 @@ export class UserController {
     let selectedCategory =
       req.query.category === "0" ? undefined : Number(req.query.category);
 
-    console.log(
-      "loadmore controller",
-      lastCursor,
-      searchString,
-      selectedCategory
-    );
     const getEvents = await this.userService.loadMoreEvents(
       Number(lastCursor),
       searchString,
@@ -79,7 +73,6 @@ export class UserController {
     let selectedCategory =
       req.query.category === "0" ? undefined : Number(req.query.category);
 
-    console.log("Controller : ", searchString, selectedCategory);
     const events = await this.userService.getEventBySearch(
       searchString,
       selectedCategory

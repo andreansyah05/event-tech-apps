@@ -26,8 +26,6 @@ export class AuthMiddleware {
 
     // Memeriksa apakah semua field yang dibutuhkan telah diisi
     if (!email || !name || !password || !role) {
-      console.log("Fields : ", req.body);
-
       // Jika ada field yang kosong, mengirimkan respons error dengan status 400
       res.status(400).send({
         status: res.statusCode,
@@ -51,7 +49,6 @@ export class AuthMiddleware {
     try {
       // Mendapatkan token dari header Authorization
       const token = req.headers.authorization?.split(" ")[1] as string;
-      console.log("validate token", token);
 
       // Jika token tidak ada, mengirimkan respons error dengan status 401
       if (!token) {
@@ -71,9 +68,8 @@ export class AuthMiddleware {
       // Melanjutkan ke middleware berikutnya jika token valid
       next();
     } catch (error) {
-      console.error(error);
       // Jika terjadi error saat memverifikasi token, mengirimkan respons error dengan status 401
-      res.status(401).send({ message: "Invalid token" });
+      res.status(401).send({ message: "Invalid token", detail: error });
     }
   }
 
@@ -87,12 +83,9 @@ export class AuthMiddleware {
         // Memverifikasi dan mendekode token
         const decodeToken = jwt.verify(token, SECRET_KEY) as TokenPayloadProps;
 
-        console.log("middleware decodetoken:", decodeToken);
-
         // Memeriksa apakah role dalam token cocok dengan role yang diberikan pada middleware
         if (decodeToken.user_role !== role) {
           // Jika peran tidak cocok, mengirimkan respons error dengan status 403 (Forbidden)
-          console.log("decoded token exec");
           res.status(403).send({
             status: res.statusCode,
             message: "Unauthorized",
@@ -102,10 +95,10 @@ export class AuthMiddleware {
           next();
         }
       } catch (error) {
-        console.log("Details", error);
         // Jika terjadi error, mengirimkan respons error dengan status 401
         res.status(401).send({
           status: res.statusCode,
+          detail: error,
           message: "Invalid Token",
         });
       }

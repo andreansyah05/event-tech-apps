@@ -2,16 +2,18 @@ import { Request, Response } from "express";
 import { AuthStatusResponseCode } from "../../models/auth.interface";
 
 import { AuthService } from "../../services/user.services/auth.service";
+import { AuthUtils } from "../../utils/auth.utils";
 
 export class AuthController {
   private authService: AuthService;
+  private authUtils: AuthUtils;
   constructor() {
     this.authService = new AuthService();
+    this.authUtils = new AuthUtils();
   }
 
   async registerUser(req: Request, res: Response) {
     const response = await this.authService.registerUser(req.body);
-    console.log("Resp:", response);
     if (response?.status === 201) {
       res.status(201).send({
         message: "User registered successfully",
@@ -85,23 +87,25 @@ export class AuthController {
   }
 
   async logoutUser(req: Request, res: Response) {
-    const user_id = Number(req.params.user_id);
-    const response = await this.authService.logoutUser(user_id);
-    if (response.status === 200) {
-      res.status(200).send({
-        message: "User logged out successfully",
-        status: res.statusCode,
-      });
-    } else {
-      res.status(404).send({
-        message: "Failed to log out user",
-        status: res.statusCode,
-      });
+    // Decoded Token
+    const decodedToken = await this.authUtils.getAuthenticatedUser(req);
+    if (decodedToken) {
+      const response = await this.authService.logoutUser(decodedToken.user_id);
+      if (response.status === 200) {
+        res.status(200).send({
+          message: "User logged out successfully",
+          status: res.statusCode,
+        });
+      } else {
+        res.status(404).send({
+          message: "Failed to log out user",
+          status: res.statusCode,
+        });
+      }
     }
   }
   async validateToken(req: Request, res: Response) {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log(token);
     const response = await this.authService.validateToken(token as string);
     if (response.status === 200) {
       res.status(200).send({
