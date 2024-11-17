@@ -5,10 +5,17 @@ import Button from "./Button";
 
 interface EvenListProps {
   eventData: EventCardProps[];
+  isLoading: boolean;
+  eventIsLimit: boolean;
   onClick?: () => void;
 }
 
-function EventList({ eventData, onClick }: EvenListProps) {
+function EventList({
+  eventData,
+  onClick,
+  isLoading,
+  eventIsLimit,
+}: EvenListProps) {
   const router = useRouter();
   function redirectToDetail(eventId: number) {
     router.push(`/event/${eventId}`);
@@ -43,13 +50,22 @@ function EventList({ eventData, onClick }: EvenListProps) {
         })}
       </div>
       <div className="w-full py-8 flex justify-center">
-        <Button
-          isButton={true}
-          text="Load More"
-          width="w-fit"
-          type="primary"
-          onClick={onClick}
-        />
+        {eventIsLimit ? (
+          <div>
+            <p className="text-sm text-center text-gray-400">
+              You already reach the end of list
+            </p>
+          </div>
+        ) : (
+          <Button
+            isButton={true}
+            text="Load More"
+            width="w-fit"
+            type="primary"
+            onClick={onClick}
+            isLoading={isLoading}
+          />
+        )}
       </div>
     </div>
   );

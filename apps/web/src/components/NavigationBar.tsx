@@ -8,6 +8,7 @@ import { AuthHandler } from "@/utils/authValidation";
 import { formatNumber } from "@/utils/formatter/formatNumber";
 import UserMenu from "./UserMenu";
 import NavLink from "./NavLink";
+import Overlay from "./Overlay";
 
 interface NavigationBarProps {
   isLogin: boolean;
@@ -25,6 +26,7 @@ function NavigationBar({
   const { user, userLogin, userLogout, isLoading, setLoading } = useAuth();
   const uniqueCode = userRole === "user" ? "ussr" : "ussad";
   const [showMenu, setShowMenu] = useState<boolean>(false);
+  const [showOverlay, setShowOverlay] = useState<boolean>(false);
   const authHandler = new AuthHandler();
   let formattedNumber: string = "0";
   if (point) {
@@ -32,7 +34,9 @@ function NavigationBar({
   }
   // Add logout functionality here using userLogout hook
   function handleLogout(scope: "user" | "admin") {
-    userLogout();
+    setShowOverlay(true);
+    const token = Cookies.get(`access${uniqueCode}_token`);
+    userLogout(token as string);
     Cookies.remove(`access${uniqueCode}_token`);
     Cookies.remove(`refresh${uniqueCode}_token`);
     if (scope === "user") {
@@ -107,7 +111,7 @@ function NavigationBar({
           alt="coin"
           src="/icon/coin.svg"
         />
-        <p className=" font-semibold">{formattedNumber}</p>
+        <p className="text-sm font-semibold sm:text-base">{formattedNumber}</p>
       </div>
       <button
         className="cursor-pointer p-2 bg-[#f8f7f7] rounded-md flex gap-2 items-center hover:bg-zinc-100"
@@ -119,11 +123,11 @@ function NavigationBar({
         <Image
           width={64}
           height={64}
-          className="w-6 h-6"
+          className="w-5 h-5  sm:w-6 sm:h-6"
           alt="coin"
           src="/icon/user.svg"
         />
-        <p className="font-semibold">{name}</p>
+        <p className="hidden font-semibold sm:inline-block">{name}</p>
         <Image
           width={64}
           height={64}
@@ -145,6 +149,7 @@ function NavigationBar({
     case "user":
       return (
         <>
+          {showOverlay ? <Overlay /> : ""}
           <header className="p-3 bg-transparent">
             <div className="max-w-screen-xl mx-auto w-full flex justify-between items-center">
               <Link href="/">
@@ -154,7 +159,7 @@ function NavigationBar({
                   height={164}
                   //layout="responsive"
                   alt="main-logo"
-                  className="w-36"
+                  className="w-28 sm:w-36"
                 />
               </Link>
 
@@ -195,6 +200,7 @@ function NavigationBar({
     case "admin":
       return (
         <>
+          {showOverlay ? <Overlay /> : ""}
           <header className="p-3 bg-transparent">
             <div className="max-w-screen-xl mx-auto w-full flex justify-between items-center">
               <Link href="/">
@@ -210,7 +216,7 @@ function NavigationBar({
               <nav>
                 <ul className="flex gap-3">
                   <li>
-                    <NavLink href="/">Home</NavLink>
+                    <NavLink href="/admin/dashboard">Dashboard</NavLink>
                   </li>
                   <li>
                     <NavLink href="/admin/list-events">List Events</NavLink>

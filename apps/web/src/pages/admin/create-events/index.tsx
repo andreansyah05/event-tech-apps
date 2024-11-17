@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { CreateEventAdmin } from "@/utils/Create-event-admin";
 import { CreateEvent } from "@/models/createevent";
 import Swal from "sweetalert2";
 import NavigationBar from "@/components/NavigationBar";
 import { useAuth } from "@/utils/userContext";
+import Button from "@/components/Button";
+import Cookies from "js-cookie";
+import { UniqueCode } from "@/models/models";
+import { EventHandlerApi } from "@/utils/eventHandler";
+import Header from "@/components/Header";
+import { Category } from "@/models/categoryList";
 
 function CreateEventForm() {
   const router = useRouter();
+  const eventHandlerApi = new EventHandlerApi();
   const { user, isLogin, isLoading } = useAuth();
+  const [isLoadingButton, setIsLoading] = useState<Boolean>(false);
+  const adminToken = Cookies.get(`access${UniqueCode.ADMIN}_token`);
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
 
   const [formData, setFormData] = useState<CreateEvent>({
     event_name: "",
@@ -47,6 +56,15 @@ function CreateEventForm() {
       [name]: value,
     }));
   };
+
+  async function handleFetchCategory() {
+    try {
+      const response = await eventHandlerApi.getAllCategories();
+      setCategoryList(response.data);
+    } catch (error) {
+      return error;
+    }
+  }
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -261,14 +279,19 @@ function CreateEventForm() {
     data.append("event_image", formData.event_image);
 
     try {
-      await CreateEventAdmin(data).then((response) => {
-        if (response) {
-          console.log(response);
-          alert("Event berhasil dibuat!");
-          router.push("/admin/list-events");
-        }
-      });
+      setIsLoading(true);
+      await eventHandlerApi
+        .createEvent(data, adminToken as string)
+        .then((response) => {
+          if (response) {
+            setIsLoading(false);
+            console.log(response);
+            alert("Event berhasil dibuat!");
+            router.push("/admin/list-events");
+          }
+        });
     } catch (error) {
+      setIsLoading(false);
       alert("Terjadi kesalahan: ");
     }
   };
@@ -291,6 +314,7 @@ function CreateEventForm() {
     if (!isLoading) {
       console.log("execute if user are admin");
       if (user?.user_role === "admin") {
+        handleFetchCategory();
         // Do nothing
       } else {
         console.log("execute if user are not admin");
@@ -301,10 +325,14 @@ function CreateEventForm() {
 
   return (
     <>
+      <Header>
+        <title>Create Events | Admin</title>
+      </Header>
+
       <NavigationBar userRole="admin" isLogin={isLogin} />
       {user?.user_role === "admin" ? (
         <form onSubmit={handleSubmit}>
-          <div className="bg-gray-100">
+          <div className="p-4 ">
             <div className="container mx-auto p-6">
               <h1 className="text-3xl font-bold mb-6">CREATE NEW EVENT</h1>
 
@@ -327,7 +355,7 @@ function CreateEventForm() {
                         target: { name: "event_name", value: e.target.value },
                       })
                     }
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="bg-white appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="Ex: Tech Conference 2024"
                   />
                 </div>
@@ -354,7 +382,7 @@ function CreateEventForm() {
                     }}
                     type="file"
                     id="event-image"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="bg-white  appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />
                 </div>
 
@@ -379,7 +407,7 @@ function CreateEventForm() {
                         },
                       })
                     }
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="bg-white appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="Ex: 25"
                   />
                 </div>
@@ -401,12 +429,16 @@ function CreateEventForm() {
                         target: { name: "categoryId", value: e.target.value },
                       })
                     }
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="bg-white appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
                     <option value={0}>Select Category</option>
-                    <option value={1}>Tech</option>
-                    <option value={2}>Music</option>
-                    <option value={3}>Art</option>
+                    {categoryList.map((category: Category, index: number) => {
+                      return (
+                        <option key={index} value={category.category_id}>
+                          {category.category_name}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -422,6 +454,7 @@ function CreateEventForm() {
                     id="event-description"
                     name="event_description"
                     value={formData.event_description}
+                    rows={6}
                     onChange={(e) =>
                       handleChange({
                         target: {
@@ -430,7 +463,7 @@ function CreateEventForm() {
                         },
                       })
                     }
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="resize-none bg-white appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="Describe the event..."
                   ></textarea>
                 </div>
@@ -685,12 +718,13 @@ function CreateEventForm() {
 
                 {/* Submit Button */}
                 <div className="col-span-1 sm:col-span-2">
-                  <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                  >
-                    Create Event
-                  </button>
+                  <Button
+                    isButton={true}
+                    text="Create Event"
+                    type="primary"
+                    width="w-fit"
+                    isLoading={isLoadingButton as boolean}
+                  />
                 </div>
               </div>
             </div>

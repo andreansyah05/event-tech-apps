@@ -61,6 +61,7 @@ const MyBarChartTransaction = () => {
           ...item,
           month: getMonthName(item.month), // Mengubah angka bulan menjadi nama bulan
         }));
+        console.log(transformedData);
         setChartData(transformedData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -88,11 +89,11 @@ const MyBarChartTransaction = () => {
             labels: chartData.map((item) => item.month), // Menggunakan nama bulan
             datasets: [
               {
-                label: "Total Register",
+                label: "Total Registration",
                 data: chartData.map((item) => item.count),
-                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                borderColor: "rgba(255, 99, 132, 1)",
+                backgroundColor: "#2563eb",
                 borderWidth: 1,
+                borderColor: "#dedede",
               },
             ],
           },
@@ -102,18 +103,22 @@ const MyBarChartTransaction = () => {
               x: {
                 type: "category",
                 ticks: {
-                  color: "white", // Mengganti warna font sumbu X menjadi putih
+                  color: "#3d3d3d", // Mengganti warna font sumbu X menjadi putih
                   font: {
-                    size: 14, // Ukuran font pada sumbu X
+                    family: "sans-serif",
+                    size: 13, // Ukuran font pada sumbu X
+                    weight: "bold",
                   },
                 },
               },
               y: {
                 beginAtZero: true,
                 ticks: {
-                  color: "white", // Mengganti warna font sumbu Y menjadi putih
+                  color: "#3d3d3d", // Mengganti warna font sumbu Y menjadi putih
                   font: {
-                    size: 14, // Ukuran font pada sumbu Y
+                    family: "sans-serif",
+                    size: 13, // Ukuran font pada sumbu Y
+                    weight: "bold",
                   },
                 },
               },
@@ -121,22 +126,20 @@ const MyBarChartTransaction = () => {
             plugins: {
               title: {
                 display: true,
-                text: "Registration per Month",
-                color: "white", // Mengganti warna font title menjadi putih
+                color: "#3d3d3d", // Mengganti warna font title menjadi putih
                 font: {
                   size: 16, // Ukuran font title
+                  weight: "bolder",
                 },
               },
               tooltip: {
                 titleColor: "white", // Mengganti warna font title tooltip menjadi putih
                 bodyColor: "white", // Mengganti warna font body tooltip menjadi putih
-                backgroundColor: "rgba(0, 0, 0, 0.7)", // Warna latar belakang tooltip
-                borderColor: "white", // Warna border tooltip
-                borderWidth: 1, // Ketebalan border tooltip
+                backgroundColor: "black", // Warna latar belakang tooltip
               },
               legend: {
                 labels: {
-                  color: "white", // Mengganti warna font legend menjadi putih
+                  color: "#3d3d3d", // Mengganti warna font legend menjadi putih
                 },
               },
             },

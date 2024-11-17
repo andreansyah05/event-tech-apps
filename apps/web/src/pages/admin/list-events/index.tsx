@@ -5,6 +5,7 @@ import { Event } from "@/models/createevent";
 import Link from "next/link";
 import { useAuth } from "@/utils/userContext";
 import NavigationBar from "@/components/NavigationBar";
+import Header from "@/components/Header";
 
 function Listevent() {
   const [events, setEvents] = useState([]);
@@ -158,110 +159,115 @@ function Listevent() {
 
   return (
     <>
-      <>
-        <NavigationBar userRole="admin" isLogin={isLogin} />
-        {user?.user_role === "admin" ? (
-          <div className="container mx-auto mt-10 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-bold text-gray-800">LIST EVENT</h1>
-            <div className="flex flex-col sm:flex-row sm:justify-between mt-6">
-              <div className="relative w-full sm:w-auto">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  value={inputSearch}
-                  onChange={(e) => handleInputSearch(e.target.value)}
-                  className="w-full sm:w-64 pl-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 absolute left-3 top-3 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-
-              <Link
-                className="mt-4 sm:mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md text-center"
-                href="/admin/create-events"
+      <Header>
+        <title>List Events | Admin</title>
+      </Header>
+      <NavigationBar userRole="admin" isLogin={isLogin} />
+      {user?.user_role === "admin" ? (
+        <div className="container mx-auto mt-10">
+          <h1 className="text-2xl font-bold text-gray-800">LIST EVENT</h1>
+          <div className="flex justify-between mt-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search"
+                value={inputSearch}
+                onChange={(e) => handleInputSearch(e.target.value)}
+                className="w-64 pl-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 absolute left-3 top-3 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                CREATE EVENTS
-              </Link>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </div>
 
-            <div className="overflow-x-auto mt-10">
-              <table className="min-w-full bg-white border border-gray-300">
-                <thead>
-                  <tr>
-                    <th className="border px-4 py-2 text-left">Title</th>
-                    <th className="border px-4 py-2 text-left">Category</th>
-                    <th className="border px-4 py-2 text-left">Quota</th>
-                    <th className="border px-4 py-2 text-left">Status</th>
-                    <th className="border px-4 py-2 text-left">End Date</th>
-                    <th className="border px-4 py-2 text-left">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {events.length > 0 ? (
-                    events.map((event: Event, index) => (
-                      <tr key={index}>
-                        <td className="border px-4 py-2">{event.event_name}</td>
-                        <td className="border px-4 py-2">
-                          {event.category_name}
-                        </td>
-                        <td className="border px-4 py-2">
-                          {event.event_capacity}
-                        </td>
-                        <td className="border px-4 py-2">
-                          {event.event_status}
-                        </td>
-                        <td className="border px-4 py-2">
-                          {event.event_end_date as string}
-                        </td>
-                        <td className="border px-4 py-2">
-                          <Link
-                            className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault(); // Mencegah navigasi default
-                              handleEdit(event.event_id); // Memanggil fungsi handleEdit
-                            }}
-                          >
-                            Edit
-                          </Link>
-
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 rounded"
-                            onClick={() => handleDelete(event.event_id)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td className="border px-4 py-2 text-center">
-                        No events available.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            <div>
+              <select className="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Status</option>
+                <option value="completed">Completed</option>
+                <option value="in progress">In Progress</option>
+              </select>
             </div>
+            <Link
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+              href="/admin/create-events"
+            >
+              CREATE EVENTS
+            </Link>
           </div>
-        ) : (
-          ""
-        )}
-      </>
+
+          <table className="min-w-full bg-white border border-gray-300 mt-10">
+            <thead>
+              <tr>
+                <th className="border px-4 py-2">Title</th>
+
+                <th className="border px-4 py-2">Category</th>
+
+                <th className="border px-4 py-2">Quota</th>
+
+                <th className="border px-4 py-2">Status</th>
+
+                <th className="border px-4 py-2">End Date</th>
+
+                <th className="border px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {events.length > 0 ? (
+                events.map((event: Event, index) => (
+                  <tr key={index}>
+                    <td className="border px-4 py-2">{event.event_name}</td>
+                    <td className="border px-4 py-2">{event.category_name}</td>
+                    <td className="border px-4 py-2">{event.event_capacity}</td>
+                    <td className="border px-4 py-2">{event.event_status}</td>
+                    <td className="border px-4 py-2">
+                      {event.event_end_date as string}
+                    </td>
+                    <td className="border px-4 py-2">
+                      <Link
+                        className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault(); // Mencegah navigasi default
+                          handleEdit(event.event_id); // Memanggil fungsi handleEdit
+                        }}
+                      >
+                        Edit
+                      </Link>
+
+                      <button
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                        onClick={() => handleDelete(event.event_id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="border px-4 py-2 text-center">
+                    No events available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 }

@@ -54,6 +54,7 @@ function BookingModal({
   const [showDelayedModal, setShowDelayedModal] = useState<boolean>(false);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const token = Cookies.get(`access${UniqueCode.USER}_token`);
   const [toast, setToast] = useState<Toast>({
     highlightText: "",
@@ -96,6 +97,7 @@ function BookingModal({
       is_paid: isPaid,
     };
     try {
+      setIsLoading(true);
       const bookingResult = await bookingHandler.bookingEvent(
         bookingData,
         token as string
@@ -119,6 +121,7 @@ function BookingModal({
             );
           }, 500);
         } else {
+          setIsLoading(false);
           setShowModal(true);
         }
       } else if (bookingResult.errorCode === BookingServiceCode.NAQuoata) {
@@ -137,6 +140,7 @@ function BookingModal({
             showToast: false,
           });
         }, 2000);
+        setIsLoading(false);
       } else if (
         bookingResult.errorCode === BookingServiceCode.RegistarationClose
       ) {
@@ -154,6 +158,7 @@ function BookingModal({
             showToast: false,
           });
         }, 2000);
+        setIsLoading(false);
       } else if (
         bookingResult.errorCode === BookingServiceCode.WaitingForPayment
       ) {
@@ -171,6 +176,7 @@ function BookingModal({
             showToast: false,
           });
         }, 2000);
+        setIsLoading(false);
       }
     } catch (error) {
       alert("Failed to book the event. Please try again.");
@@ -361,6 +367,7 @@ function BookingModal({
                 type="primary"
                 width="w-full"
                 isButtonDisable={isPaid ? isButtonDisabled : false}
+                isLoading={isLoading}
                 onClick={handleBooking}
               />
             </div>

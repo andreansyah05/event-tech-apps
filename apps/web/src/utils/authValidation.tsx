@@ -92,6 +92,19 @@ export class AuthHandler {
     }
   }
 
+  async handleUserLogout(token: string) {
+    try {
+      const response = await axios.put(
+        "/api/auth/logout-user",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {}
+  }
   // Fungsi untuk mengirim data registrasi ke server
   async handleRegistrationUser(formData: RegisterForm) {
     try {
@@ -167,8 +180,10 @@ export class AuthHandler {
         }
       }
     } catch (error) {
-      Cookies.remove("access_token");
-      Cookies.remove("refresh_token");
+      Cookies.remove(`access${UniqueCode.USER}_token`);
+      Cookies.remove(`refresh${UniqueCode.USER}_token`);
+      Cookies.remove(`access${UniqueCode.ADMIN}_token`);
+      Cookies.remove(`refresh${UniqueCode.ADMIN}_token`);
     }
   }
 

@@ -5,9 +5,11 @@ import { ReferralHandler } from "@/utils/referralHandler";
 import Cookies from "js-cookie";
 import Toast from "../alert";
 import { useAuth } from "@/utils/userContext";
+import { UniqueCode } from "@/models/models";
 
 function ReferralSection() {
   const { updateUserPoint } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const referralHandler = new ReferralHandler();
   const [inputReferral, setInputReferral] = useState<string>("");
   const [inputError, setInputError] = useState<boolean>(false);
@@ -21,10 +23,11 @@ function ReferralSection() {
 
   async function handleSubmitReferral(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const accessToken = Cookies.get("access_token");
+    const accessToken = Cookies.get(`access${UniqueCode.USER}_token`);
     if (inputReferral === "") {
       setInputError(true);
     } else {
+      setIsLoading(true);
       const response = await referralHandler.useReferralCode(
         inputReferral,
         accessToken as string
@@ -50,6 +53,7 @@ function ReferralSection() {
           setShowToast(false);
         }, 1200);
       }
+      setIsLoading(false);
     }
   }
   console.log(inputReferral);
@@ -108,7 +112,8 @@ function ReferralSection() {
                 isButton={true}
                 text="Get Points"
                 type="secondary"
-                width="w-full"
+                width="w-fit"
+                isLoading={isLoading}
               />
             </div>
             {inputError ? (

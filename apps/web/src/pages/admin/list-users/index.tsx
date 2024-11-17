@@ -4,8 +4,12 @@ import { user } from "@/models/listUsers"; // Pastikan tipe user sesuai dengan s
 import Swal from "sweetalert2";
 import NavigationBar from "@/components/NavigationBar";
 import { useAuth } from "@/utils/userContext";
+import Cookies from "js-cookie";
+import { UniqueCode } from "@/models/models";
+import Header from "@/components/Header";
 
 const Index = () => {
+  const adminToken = Cookies.get(`access${UniqueCode}_token`);
   // Menggunakan nama state yang lebih deskriptif
   const [users, setUsers] = useState<user[]>([]);
   const isInitialRender = useRef<boolean>(true); // Check if its already be render or not
@@ -29,7 +33,11 @@ const Index = () => {
       });
 
       // Memanggil API untuk mendapatkan data users
-      const response = await axios.get("/api/admin/list-users");
+      const response = await axios.get("/api/admin/list-users", {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      });
 
       if (response.status === 200 && response.data) {
         // Menyimpan data jika berhasil
@@ -80,6 +88,9 @@ const Index = () => {
 
   return (
     <>
+      <Header>
+        <title>List Users | Admin</title>
+      </Header>
       <NavigationBar userRole="admin" isLogin={isLogin} />
 
       {user?.user_role === "admin" ? (

@@ -13,6 +13,8 @@ import EmptyResultSection from "./EmptyResultSection";
 
 function EventListSection() {
   const eventHandlerApi = new EventHandlerApi(); // Initialize event handler API
+  const [eventIsLimit, setEventIsLimit] = useState<boolean>(false);
+  const [isLoadingButton, setIsLoadingButton] = useState<boolean>(false);
   const [inputSearch, setInputSearch] = useState<string>("");
   const [eventData, setEventData] = useState<EventCardProps[]>([]);
   const [isLoadingEvent, setIsLoadingEvent] = useState(true); // Track data loading state
@@ -44,6 +46,7 @@ function EventListSection() {
     category?: string
   ) {
     if (inputSearch === "" && selectedCategory === "0") {
+      setEventIsLimit(false);
       setEmptyResult(false);
       setIsLoadingEvent(true); // set loading to true
       const response: any = await eventHandlerApi.getAllEvent();
@@ -52,6 +55,7 @@ function EventListSection() {
       setIsLoadingEvent(false);
     } else {
       try {
+        setEventIsLimit(false);
         setEmptyResult(false);
         setIsLoadingEvent(true); // set loading to true
         console.log(inputSearch);
@@ -88,16 +92,23 @@ function EventListSection() {
   async function handleFetchMoreData() {
     console.log(lastCursor);
     try {
+      setIsLoadingButton(true);
       const response: any = await eventHandlerApi.getMoreEvent(
         lastCursor as number,
         inputSearch,
         selectedCategory
       );
+      console.log("Load More Data: ", response.data);
+      if (response.data.length === 0) {
+        setEventIsLimit(true);
+      }
       setEventData((prevState) => [...prevState, ...response.data]);
+
       setLastCursor(response.cursor);
     } catch (error: any) {
       console.log(error);
     } finally {
+      setIsLoadingButton(false);
       setIsLoadingEvent(false);
     }
   }
@@ -134,7 +145,7 @@ function EventListSection() {
     <section id="productSection" className="px-4 py-10">
       <div className="max-w-screen-xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[325px_1fr]">
         {/* SEARCH INPUT */}
-        <div className="max-w-96 flex flex-col gap-6">
+        <div className="w-full lg:max-w-96 flex flex-col gap-6">
           <h2 className="text-gray-950 text-2xl font-bold  lg:text-3xl ">
             EXPLORE OUR EVENT
           </h2>
@@ -154,32 +165,35 @@ function EventListSection() {
               {isLoadingCategories ? (
                 <CategoryListLoading />
               ) : (
-                <div className="flex gap-2 flex-wrap">
-                  <RadioChips
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      handleCategoryChange(event)
-                    }
-                    name="category"
-                    text="All Categories"
-                    value={0}
-                    checked={selectedCategory === "0"}
-                  />
-                  {categories.map((categories: Category, index: number) => {
-                    return (
-                      <RadioChips
-                        key={index}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>
-                        ) => handleCategoryChange(event)}
-                        name="category"
-                        text={categories.category_name}
-                        value={categories.category_id}
-                        checked={
-                          selectedCategory === categories.category_id.toString()
-                        }
-                      />
-                    );
-                  })}
+                <div className="w-fill">
+                  <div className="w-auto flex gap-2 overflow-scroll md:flex md:flex-wrap">
+                    <RadioChips
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        handleCategoryChange(event)
+                      }
+                      name="category"
+                      text="All Categories"
+                      value={0}
+                      checked={selectedCategory === "0"}
+                    />
+                    {categories.map((categories: Category, index: number) => {
+                      return (
+                        <RadioChips
+                          key={index}
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>
+                          ) => handleCategoryChange(event)}
+                          name="category"
+                          text={categories.category_name}
+                          value={categories.category_id}
+                          checked={
+                            selectedCategory ===
+                            categories.category_id.toString()
+                          }
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </Suspense>
@@ -194,7 +208,12 @@ function EventListSection() {
             {isLoadingEvent ? (
               <EventListLoading />
             ) : (
-              <EventList eventData={eventData} onClick={handleFetchMoreData} />
+              <EventList
+                eventIsLimit={eventIsLimit}
+                eventData={eventData}
+                isLoading={isLoadingButton}
+                onClick={handleFetchMoreData}
+              />
             )}
           </Suspense>
         )}
