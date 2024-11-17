@@ -24,7 +24,6 @@ export class AuthService {
       },
     });
     if (checkEmail) {
-      console.log(checkEmail);
       return { code: "AU", status: 400, message: "Email already registered" };
     }
 
@@ -91,6 +90,15 @@ export class AuthService {
       };
     }
 
+    // CHECK THE ROLE
+    if (user.user_role === "admin") {
+      return {
+        code: "IN",
+        status: 401,
+        message: "Cannot login with admin account",
+      };
+    }
+
     // Generate Token
     const { refreshToken, accessToken } =
       await this.authUtil.generateLoginToken(
@@ -129,7 +137,6 @@ export class AuthService {
     // generate a new access token
 
     // Decode refresh token
-    console.log("Refresh Token", token);
     const decodedToken = await this.authUtil.decodeToken(token);
     if (!decodedToken) {
       return {
@@ -138,8 +145,6 @@ export class AuthService {
       };
     }
     const { email, user_id } = decodedToken;
-
-    console.log("Decoded Token Result", decodedToken);
 
     // Check user is available based on id
     const user = await this.prisma.users.findUnique({
@@ -176,7 +181,6 @@ export class AuthService {
   async validateToken(token: string) {
     // Decode refresh token
     const decodedToken = await this.authUtil.decodeToken(token);
-    console.log(token);
     if (!decodedToken) {
       return {
         status: 400,
@@ -221,7 +225,6 @@ export class AuthService {
         data: user,
       };
     } catch (error) {
-      console.log(error);
       return { status: 404 };
     }
   }

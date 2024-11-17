@@ -99,6 +99,7 @@ export class EventHandlerApi {
 
   async updateEvent(formData: FormData, event_id: number, adminToken: string) {
     console.log("inputd data : ", formData);
+    console.log(adminToken);
     try {
       const response = await axios.put(
         `/api/admin/events/${event_id}`,

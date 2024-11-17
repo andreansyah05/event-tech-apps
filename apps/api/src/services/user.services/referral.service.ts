@@ -33,7 +33,6 @@ export class ReferralService {
     } while (isUse === true);
 
     // create referral code
-    console.log(referralCode);
     const createReferral = await this.prisma.user_Referral.create({
       data: {
         referral_code: referralCode,
@@ -65,14 +64,11 @@ export class ReferralService {
       return { status: 404, message: "Invalid referral code" };
       // Check the limit of the referral code
     } else if (referral.total_use === referral.limit_use) {
-      console.log("Total Use : ", referral.total_use);
-      console.log("Total Use : ", referral.limit_use);
       return {
         status: 400,
         message: "Referral code has been used",
       };
     }
-    console.log("Referral :", referral);
 
     // user of the owner of referral
     const referralOwner = await this.prisma.users.findFirst({
@@ -81,7 +77,6 @@ export class ReferralService {
       },
     });
     if (!referralOwner) {
-      console.log(referralOwner);
       return { status: 404, message: "Referral owner not found" };
     }
 

@@ -48,7 +48,6 @@ export class AdminService {
 
   async getEventById(event_id: number) {
     // Mengambil event tunggal berdasarkan ID yang diberikan
-    console.log("tesssst", event_id);
     return this.prisma.event.findUnique({
       where: { event_id },
       include: { Discount: true },
@@ -113,12 +112,6 @@ export class AdminService {
     discountPercentage: number,
     is_active: boolean
   ) {
-    console.log("Service event id: ", event_id);
-    console.log("Service discount id: ", discount_id);
-    console.log("Service Event Data: ", updatedEventData);
-    console.log("Service Discount percentage: ", discountPercentage);
-    console.log("Service is active: ", is_active);
-
     // Menghitung harga setelah diskon untuk event yang diperbarui
     const originalPrice = updatedEventData?.event_price as number; // Mengambil harga asli
     const discountedPrice = originalPrice * (1 - discountPercentage / 100); // Menghitung harga diskon
@@ -155,7 +148,6 @@ export class AdminService {
         is_paid: updatedEventData.is_paid,
       },
     });
-    console.log("updateeventdata:", updatedEventData);
 
     // Memperbarui diskon terkait dengan event
     const newDiscount = await this.prisma.dicount_Event.update({
@@ -235,7 +227,6 @@ export class AdminService {
 
       return listEvent;
     } else {
-      console.log("No event found with this search string.");
       return [];
     }
   }

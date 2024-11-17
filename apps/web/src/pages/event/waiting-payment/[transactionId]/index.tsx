@@ -184,7 +184,7 @@ function WaitingPaymentPage() {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="col-span-2">
                   <p className="text-sm text-gray-500 mb-3">Event Name</p>
-                  <h2 className=" font-bold text-gray-950 uppercase lg:text-2xl">
+                  <h2 className="break-all font-bold text-gray-950 uppercase lg:text-2xl">
                     {transaction.event_name}
                   </h2>
                 </div>

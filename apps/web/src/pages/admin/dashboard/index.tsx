@@ -50,26 +50,26 @@ function AdminDashboard() {
   async function handleFethindData() {
     try {
       // Menggunakan Promise.all untuk fetch data dari 4 endpoint secara paralel
-
+      console.log("dasboard token:", adminToken);
       const responses = await Promise.all([
         axios.get("/api/admin/dashboard/total-users", {
           headers: {
-            Authorization: `Bearer ${adminToken}`,
+            Authorization: `Bearer ${adminToken as string}`,
           },
         }),
         axios.get("/api/admin/dashboard/total-listevents", {
           headers: {
-            Authorization: `Bearer ${adminToken}`,
+            Authorization: `Bearer ${adminToken as string}`,
           },
         }),
         axios.get("/api/admin/dashboard/total-transaction", {
           headers: {
-            Authorization: `Bearer ${adminToken}`,
+            Authorization: `Bearer ${adminToken as string}`,
           },
         }),
         axios.get("/api/admin/dashboard/total-transaction-value", {
           headers: {
-            Authorization: `Bearer ${adminToken}`,
+            Authorization: `Bearer ${adminToken as string}`,
           },
         }),
         // axios.get("/api/admin/dashboard/total-registration"),
@@ -195,13 +195,13 @@ function AdminDashboard() {
                 <h3 className="text-lg text-gray-900 font-bold">
                   Total Registration for the last 6 month
                 </h3>
-                <MyBarChart />
+                <MyBarChart adminToken={adminToken as string} />
               </div>
               <div className="flex flex-col  py-10 px-10 bg-zinc-50 border border-zinc-200 rounded-lg w-full ">
                 <h3 className="text-lg text-gray-900 font-bold">
                   Total Transaction for the last 6 month
                 </h3>
-                <MyBarChartTransaction />
+                <MyBarChartTransaction adminToken={adminToken as string} />
               </div>
             </div>
           </section>

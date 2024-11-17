@@ -138,15 +138,10 @@ export class BookingEventService {
           ],
         },
       });
-      console.log("Check User Join", checkUserJoined);
 
       // Check if the user is already join or not with the status still waiting for payment
       if (checkUserJoined) {
-        console.log("Checked", checkUserJoined);
-        console.log("Checked status", checkUserJoined.status_order);
-        console.log("enum:", BookingStatus.WaitingForPayment);
         if (checkUserJoined.status_order === BookingStatus.WaitingForPayment) {
-          console.log("execute");
           return {
             code: BookingServiceCode.WaitingForPayment,
             message: "User already joined to the event but not yet paid",
@@ -154,7 +149,9 @@ export class BookingEventService {
         }
       }
     } catch (error) {
-      console.log(error);
+      return {
+        message: "Failed to check user joined or not",
+      };
     }
 
     // 3. Check if event is still have quota and its still able to registration
@@ -177,7 +174,6 @@ export class BookingEventService {
 
     // 4. Check if the user use point, check the point balance are the user have it or not
     if (bookingData.usePoint > user.points && bookingData.is_paid) {
-      console.log("execute over point");
       return {
         code: BookingServiceCode.NotEnoughPoint,
         message: "User don't have enough point",
@@ -192,8 +188,6 @@ export class BookingEventService {
       : bookingData.usePoint === 0
         ? event.event_price
         : event.event_price - bookingData.usePoint;
-
-    console.log(bookingData.is_paid, finalAmmount);
 
     const newBooking = await this.prisma.transaction.create({
       data: {
@@ -282,7 +276,9 @@ export class BookingEventService {
         message: "Transaction updated to paid",
       };
     } catch (error) {
-      console.log(error);
+      return {
+        message: "Error updating transaction",
+      };
     }
   }
 
@@ -357,7 +353,9 @@ export class BookingEventService {
         message: "Transaction updated to canceled",
       };
     } catch (error) {
-      console.log(error);
+      return {
+        message: "Failed to update transaction",
+      };
     }
   }
 
@@ -448,7 +446,10 @@ export class BookingEventService {
         createReview,
       };
     } catch (error) {
-      console.log(error);
+      return {
+        status: BookingServiceCode.FailedCreateReview,
+        message: "Failed to create review",
+      };
     }
   }
 }

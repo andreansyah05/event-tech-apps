@@ -62,10 +62,10 @@ function AdminLogin() {
       // Redirect ke halaman admin dashboard
       //
       window.location.href = "/admin/dashboard";
-    } else if (response.status === 401) {
+    } else if (response.status === 403) {
       setToast({
-        highlightText: "Invalid Email or Password",
-        text: "Please check your email or password",
+        highlightText: "You are not authorized to access this page",
+        text: "Please contact your administrator",
         type: "FAILED",
         showToast: true,
       });
@@ -73,10 +73,10 @@ function AdminLogin() {
       setTimeout(() => {
         setToast({ ...toast, showToast: false });
       }, 1500);
-    } else if (response.status === 403) {
+    } else {
       setToast({
-        highlightText: "You are not authorized to access this page",
-        text: "Please contact your administrator",
+        highlightText: "Invalid Email or Password",
+        text: "Please check your email or password",
         type: "FAILED",
         showToast: true,
       });

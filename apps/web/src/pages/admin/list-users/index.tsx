@@ -9,7 +9,7 @@ import { UniqueCode } from "@/models/models";
 import Header from "@/components/Header";
 
 const Index = () => {
-  const adminToken = Cookies.get(`access${UniqueCode}_token`);
+  const adminToken = Cookies.get(`access${UniqueCode.ADMIN}_token`);
   // Menggunakan nama state yang lebih deskriptif
   const [users, setUsers] = useState<user[]>([]);
   const isInitialRender = useRef<boolean>(true); // Check if its already be render or not

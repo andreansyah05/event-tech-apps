@@ -131,7 +131,7 @@ function TransactionCard({
           <p className="text-gray-900 text-sm font-semibold">{formattedDate}</p>
         </div>
       </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-3 md:mb-6">
+      <h2 className="break-all text-2xl font-bold text-gray-900 mb-3 md:mb-6">
         {eventTitle}
       </h2>
 

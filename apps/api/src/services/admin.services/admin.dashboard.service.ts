@@ -25,7 +25,6 @@ export class AdminDashboardService {
       });
       return { userCount };
     } catch (error) {
-      console.error("Error counting users:", error);
       throw new Error("Could not fetch user count.");
     }
   }
@@ -52,7 +51,6 @@ export class AdminDashboardService {
     ORDER BY 
     EXTRACT(MONTH FROM created_at) DESC;`);
 
-      console.log("result", result);
       const monthlyStatistic = result.map((totalRow: any) => {
         return {
           month: totalRow.month ?? null,
@@ -89,7 +87,6 @@ export class AdminDashboardService {
     ORDER BY
         EXTRACT(MONTH FROM order_date) DESC;`);
 
-      console.log("result", result);
       const monthlyStatistic = result.map((totalRow: any) => {
         return {
           month: totalRow.month ?? null,
@@ -102,28 +99,6 @@ export class AdminDashboardService {
       return [];
     }
   }
-
-  //   async getAnalyticMonthlyRegistration() {
-  //     try {
-  //       // Mendapatkan jumlah pengguna yang mendaftar dalam 6 bulan terakhir
-  //       const monthlyRegistration = await this.prisma.users.count({
-  //         where: {
-  //           user_role: "user", // Memfilter pengguna dengan peran "user"
-  //           created_at: {
-  //             gte: new Date(new Date().setMonth(new Date().getMonth() - 6)), // Memfilter pengguna yang didaftarkan dalam 6 bulan terakhir
-  //           },
-  //         },
-  //       });
-
-  //       // Mengembalikan jumlah pendaftaran pengguna dalam sebulan terakhir
-  //       return { monthlyRegistration };
-  //     } catch (error) {
-  //       // Menangani error yang terjadi selama eksekusi query
-  //       console.error("Error fetching monthly registration:", error);
-  //       // Mengembalikan error atau response lainnya sesuai kebutuhan
-  //       throw new Error("Gagal mendapatkan data pendaftaran pengguna");
-  //     }
-  //   }
 
   async getTotalListEvents() {
     // Mendapatkan jumlah event yang terjadi di seluruh tempat yang mendaftar
