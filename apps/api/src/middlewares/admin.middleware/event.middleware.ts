@@ -7,7 +7,6 @@ export class EventAdminMiddleware {
     res: Response,
     next: NextFunction
   ) {
-    console.log(req);
     const {
       categoryId,
       discount_percentage,
@@ -22,8 +21,7 @@ export class EventAdminMiddleware {
       is_paid,
       event_end_date,
     }: CreateEvent = req.body;
-    const image = (req as any).file?.path || "";
-    console.log(req.body);
+    const image = req.file ? req.file.path || "" : "";
 
     if (
       !event_name ||
@@ -173,7 +171,6 @@ export class EventAdminMiddleware {
     res: Response,
     next: NextFunction
   ) {
-    console.log(req);
     const {
       categoryId,
       discount_percentage,
@@ -188,8 +185,6 @@ export class EventAdminMiddleware {
       is_paid,
       event_end_date,
     }: CreateEvent = req.body;
-
-    console.log(req.body);
 
     if (
       !event_name ||

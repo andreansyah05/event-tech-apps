@@ -44,10 +44,4 @@ router.post(
   bookingEventController.bookingReview.bind(bookingEventController)
 );
 
-// Berhubungan dengan admin
-// 1. Lakukan validasi token terlebih dahulu
-// 2. apabila validasi token berhasil maka cek role dari user yang didapat dari token.
-// 3. Apabila validasi role berhasil maka cek req body (input) pastikan data req tidak ada yang kosong <-- Create dan update
-// 4. Apabila validasi input berhasil maka lanjut ke controller masing-masig function
-
 export default router;
