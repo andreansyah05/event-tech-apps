@@ -88,7 +88,7 @@ const MyBarChartTransaction = () => {
             labels: chartData.map((item) => item.month), // Menggunakan nama bulan
             datasets: [
               {
-                label: "Total Sales",
+                label: "Total Transactions",
                 data: chartData.map((item) => item.count),
                 backgroundColor: "rgba(255, 99, 132, 0.2)",
                 borderColor: "rgba(255, 99, 132, 1)",
