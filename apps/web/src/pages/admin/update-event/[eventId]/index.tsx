@@ -247,7 +247,11 @@ function UpdateEvents() {
         const fetchEvent = async () => {
           try {
             handleFetchCategory();
-            const response = await axios.get(`/api/admin/events/${eventId}`);
+            const response = await axios.get(`/api/admin/events/${eventId}`, {
+              headers: {
+                Authorization: `Bearer ${adminToken}`,
+              },
+            });
             const data = response.data.data;
             console.log(response);
             setFormData({

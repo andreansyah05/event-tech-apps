@@ -32,7 +32,6 @@ export class AuthUtils {
         token,
         SECRET_KEY
       )) as TokenPayloadProps;
-      console.log(token);
       return decodedToken
         ? { user_id: decodedToken.user_id, email: decodedToken.email }
         : undefined;

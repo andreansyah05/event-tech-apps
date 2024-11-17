@@ -88,7 +88,7 @@ export class AuthMiddleware {
           // Jika peran tidak cocok, mengirimkan respons error dengan status 403 (Forbidden)
           res.status(403).send({
             status: res.statusCode,
-            message: "Unauthorized",
+            message: "Unauthorized access",
           });
         } else {
           // Jika peran cocok, melanjutkan ke middleware berikutnya

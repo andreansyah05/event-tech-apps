@@ -1,5 +1,6 @@
+import Button from "@/components/Button";
+
 // pages/404.js
-import React from "react";
 
 const Custom404 = () => {
   return (
@@ -16,13 +17,14 @@ const Custom404 = () => {
             But don't worry, you can find plenty of other things on our
             homepage.
           </p>
-          <a
-            href="#"
-            className="px-8 py-3 text-lg font-semibold text-gray-50 bg-violet-600 rounded hover:bg-violet-700 dark:bg-violet-700 dark:hover:bg-violet-600"
-            rel="noopener noreferrer"
-          >
-            Back to homepage
-          </a>
+
+          <Button
+            isButton={false}
+            text="Back to homepage"
+            type="primary"
+            width="w-fit"
+            href="/"
+          />
         </div>
       </div>
     </div>

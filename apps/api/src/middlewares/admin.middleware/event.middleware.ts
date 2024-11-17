@@ -62,7 +62,7 @@ export class EventAdminMiddleware {
         status: res.statusCode, // Menyertakan status kode dari respon
         details: res.statusMessage, // Menyertakan pesan status
       });
-    } else if (Number(discount_percentage) <= 0) {
+    } else if (Number(discount_percentage) < 0) {
       res.status(400).send({
         message: "Persentase diskon harus lebih besar dari 0", // Pesan error
         status: res.statusCode, // Menyertakan status kode dari respon
@@ -224,7 +224,7 @@ export class EventAdminMiddleware {
         status: res.statusCode, // Menyertakan status kode dari respon
         details: res.statusMessage, // Menyertakan pesan status
       });
-    } else if (Number(discount_percentage) <= 0) {
+    } else if (Number(discount_percentage) < 0) {
       res.status(400).send({
         message: "Persentase diskon harus lebih besar dari 0", // Pesan error
         status: res.statusCode, // Menyertakan status kode dari respon

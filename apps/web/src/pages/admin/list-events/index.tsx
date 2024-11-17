@@ -6,8 +6,11 @@ import Link from "next/link";
 import { useAuth } from "@/utils/userContext";
 import NavigationBar from "@/components/NavigationBar";
 import Header from "@/components/Header";
+import Cookies from "js-cookie";
+import { UniqueCode } from "@/models/models";
 
 function Listevent() {
+  const adminToken = Cookies.get(`access${UniqueCode.ADMIN}_token`);
   const [events, setEvents] = useState([]);
   const [inputSearch, setInputSearch] = useState<string>("");
   const isInitialRender = useRef<boolean>(true); // Check if its already be render or not
@@ -16,7 +19,12 @@ function Listevent() {
   async function eventsearch(search: string) {
     try {
       const response = await axios.get(
-        `/api/admin/events-search?search=${search}`
+        `/api/admin/events-search?search=${search}`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
       );
       console.log("search", response.data.data);
       return response.data.data;
@@ -38,7 +46,11 @@ function Listevent() {
         },
       });
 
-      const response = await axios.get("/api/admin/events"); // Ganti dengan URL API Anda
+      const response = await axios.get("/api/admin/events", {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      }); // Ganti dengan URL API Anda
       // Jika respons berhasil, set data dan tutup SweetAlert
       if (response) {
         setEvents(response.data.data);

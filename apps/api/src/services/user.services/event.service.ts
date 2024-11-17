@@ -15,7 +15,7 @@ export class UserService {
 
     // Metode untuk mengambil semua acara dari database.
     const response = await this.prisma.event.findMany({
-      take: 3,
+      take: 9,
       orderBy: {
         created_at: "desc",
       },
@@ -58,12 +58,6 @@ export class UserService {
     searchString?: string,
     categorySelected?: number
   ) {
-    console.log(
-      "loadmore controller",
-      lastCursor,
-      searchString,
-      categorySelected
-    );
     const whereClause: Prisma.EventWhereInput = {};
     if (searchString) {
       whereClause.event_name = {
@@ -78,7 +72,7 @@ export class UserService {
     }
 
     const response = await this.prisma.event.findMany({
-      take: 3,
+      take: 9,
       skip: 1,
       cursor: {
         event_id: lastCursor,
@@ -111,9 +105,7 @@ export class UserService {
         is_paid: event.is_paid,
       };
     });
-    console.log(listEvent);
     if (listEvent.length === 0) {
-      console.log("No more events to load.");
       return {
         data: [],
         lastCursor: -1,
@@ -171,8 +163,6 @@ export class UserService {
     // Return events matching both search string and category if both are provided.
     const whereClause: Prisma.EventWhereInput = {};
 
-    console.log("services : ", searchString, categorySelected);
-
     // If search string is provided, it will search event based on search string
     if (searchString) {
       whereClause.event_name = {
@@ -197,8 +187,6 @@ export class UserService {
       },
       where: whereClause,
     });
-
-    console.log("Search Response: ", response);
 
     if (response.length !== 0) {
       const listEvent: EventResponse[] = response.map((event) => {
@@ -228,7 +216,6 @@ export class UserService {
         lastCursor: lastResponseId,
       };
     } else {
-      console.log("No event found with this search string.");
       return {
         data: [],
         lastCursor: -1,

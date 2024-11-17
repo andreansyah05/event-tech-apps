@@ -1,4 +1,5 @@
 // pages/500.js
+import Button from "@/components/Button";
 import React from "react";
 
 const Custom500 = () => {
@@ -21,13 +22,13 @@ const Custom500 = () => {
             you the deadliest of all weapons!
           </p>
 
-          <a
-            href="#"
-            className="px-8 py-3 text-lg font-semibold text-gray-50 bg-violet-600 rounded hover:bg-violet-700 dark:bg-violet-700 dark:hover:bg-violet-600"
-            rel="noopener noreferrer"
-          >
-            Back to homepage
-          </a>
+          <Button
+            isButton={false}
+            text="Back to homepage"
+            type="primary"
+            width="w-fit"
+            href="/"
+          />
         </div>
       </div>
     </div>

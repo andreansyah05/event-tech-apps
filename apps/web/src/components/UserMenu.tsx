@@ -15,14 +15,6 @@ function UserMenu({ userLogout }: UserMenu) {
       <ul className="flex flex-col gap-2">
         <li>
           <Link
-            href="/"
-            className="text-left p-2 text-gray-950 inline-block rounded-md w-full hover:bg-gray-100 "
-          >
-            Edit Profile
-          </Link>
-        </li>
-        <li>
-          <Link
             href="/user/transaction-history"
             className="text-left p-2 text-gray-950 inline-block rounded-md w-full hover:bg-gray-100 "
           >

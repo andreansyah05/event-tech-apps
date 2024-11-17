@@ -26,7 +26,11 @@ interface ChartData {
   count: number;
 }
 
-const MyBarChartTransaction = () => {
+interface chartComponentProps {
+  adminToken: string; // Token admin yang digunakan untuk mengakses API
+}
+
+const MyBarChartTransaction = ({ adminToken }: chartComponentProps) => {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
@@ -54,7 +58,12 @@ const MyBarChartTransaction = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "/api/admin/dashboard/total-montly-transaction"
+          "/api/admin/dashboard/total-montly-transaction",
+          {
+            headers: {
+              Authorization: `Bearer ${adminToken}`,
+            },
+          }
         );
         // Konversi angka bulan menjadi nama bulan
         const transformedData = response.data.map((item: ChartData) => ({

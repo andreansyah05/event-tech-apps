@@ -45,11 +45,11 @@ function EventCard({
         alt={`image - ${event_name}`}
         className="w-full h-36 object-cover object-center lg:max-w-40 lg:rounded"
       />
-      <div className="p-4 lg:w-full lg:flex lg:items-center">
+      <div className="p-4 w-full lg:flex lg:items-center">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:w-full">
           <div>
             <Chips type="CATEGORY" text={category_name} />
-            <h2 className="text-lg font-bold text-gray-950 uppercase mb-4 lg:text-xl">
+            <h2 className="break-all text-lg font-bold text-gray-950 uppercase mb-4 lg:text-xl">
               {event_name}
             </h2>
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:w-full">

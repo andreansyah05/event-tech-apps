@@ -273,7 +273,7 @@ function BookingModal({
                     className="w-16 h-16 object-cover object-center lg:max-w-40 rounded-md lg:rounded"
                   />
                   <div>
-                    <h2 className="text-lg font-bold text-gray-950 uppercase mb-1 lg:text-xl">
+                    <h2 className="break-all text-lg font-bold text-gray-950 uppercase mb-1 lg:text-xl">
                       {event_name}
                     </h2>
                     <div className="flex gap-2 w-fit">

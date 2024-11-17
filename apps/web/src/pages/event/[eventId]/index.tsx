@@ -128,7 +128,7 @@ function DetailEvent() {
             <div className="flex flex-col gap-6 bg-white lg:p-5">
               <div id="header">
                 <Chips type="CATEGORY" text={event?.category_name as string} />
-                <h1 className="text-3xl font-bold uppercase">
+                <h1 className="break-all text-3xl font-bold uppercase">
                   {event?.event_name}
                 </h1>
               </div>
