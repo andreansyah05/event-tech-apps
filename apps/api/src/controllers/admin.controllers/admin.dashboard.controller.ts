@@ -8,10 +8,14 @@ export class AdminDashboardController {
   }
   // Metode asinkron 'getUserCount' yang menerima request (req) dan response (res) dari Express
   async getUserCount(req: Request, res: Response) {
-    const userCount = await this.adminService.getUserCount();
-    if (userCount) {
-      res.status(200).send(userCount);
-    } else {
+    try {
+      const userCount = await this.adminService.getUserCount();
+      if (userCount || userCount === 0) {
+        res.status(200).send(userCount);
+      } else {
+        res.status(404).send({ message: "No user found" });
+      }
+    } catch (error) {
       res.status(500).send({ message: "Error fetching user count" });
     }
   }
@@ -34,21 +38,29 @@ export class AdminDashboardController {
   // Metode asinkron 'getTotalTransaction' yang menerima request (req) dan response (res) dari Express
   async getTotalTransaction(req: Request, res: Response) {
     const totalTransaction = await this.adminService.getTotalTransaction();
-    if (totalTransaction) {
-      res.status(200).send({
-        data: totalTransaction,
-      });
-    } else {
+    try {
+      if (totalTransaction || totalTransaction === 0) {
+        res.status(200).send({
+          data: totalTransaction,
+        });
+      } else {
+        res.status(404).send({ message: "No transaction found" });
+      }
+    } catch (error) {
       res.status(500).send({ message: "Error fetching total transaction" });
     }
   }
 
   async getTotalTransactionValue(req: Request, res: Response) {
-    const totalTransactionValue =
-      await this.adminService.getTotalTransactionValue();
-    if (totalTransactionValue) {
-      res.status(200).send(totalTransactionValue);
-    } else {
+    try {
+      const totalTransactionValue =
+        await this.adminService.getTotalTransactionValue();
+      if (totalTransactionValue || totalTransactionValue === 0) {
+        res.status(200).send(totalTransactionValue);
+      } else {
+        res.status(404).send({ message: "No transaction found" });
+      }
+    } catch (error) {
       res
         .status(500)
         .send({ message: "Error fetching total transaction value" });
@@ -57,10 +69,14 @@ export class AdminDashboardController {
 
   // Metode asinkron 'getTotalListEvents' yang menerima request (req) dan response (res) dari Express
   async getTotalListEvents(req: Request, res: Response) {
-    const totalEvents = await this.adminService.getTotalListEvents();
-    if (totalEvents) {
-      res.status(200).send(totalEvents);
-    } else {
+    try {
+      const totalEvents = await this.adminService.getTotalListEvents();
+      if (totalEvents || totalEvents === 0) {
+        res.status(200).send(totalEvents);
+      } else {
+        res.status(404).send({ message: "No events found" });
+      }
+    } catch (error) {
       res.status(500).send({ message: "Error fetching total events" });
     }
   }

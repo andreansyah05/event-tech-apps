@@ -50,8 +50,7 @@ function AdminDashboard() {
   async function handleFethindData() {
     try {
       // Menggunakan Promise.all untuk fetch data dari 4 endpoint secara paralel
-      console.log("dasboard token:", adminToken);
-      const responses = await Promise.all([
+      await Promise.all([
         axios.get("/api/admin/dashboard/total-users", {
           headers: {
             Authorization: `Bearer ${adminToken as string}`,
@@ -74,26 +73,24 @@ function AdminDashboard() {
         }),
         // axios.get("/api/admin/dashboard/total-registration"),
         // axios.get("/api/admin/dashboard/total-transaction"),
-      ]);
+      ]).then((responses) => {
+        // Pastikan setiap response berisi data yang sesuai
+        const totalUsers = responses[0]?.data?.userCount || 0;
+        const totalEvents = responses[1]?.data?.totalEvents || 0;
+        const totalPaids = responses[2]?.data?.data || 0;
+        const totalPaidValues = responses[3]?.data?._sum.payment_ammount || 0;
+        // const totalRegistration = responses[4]?.data?.totalRegistration || 0;
+        // const totalTransaction = responses[5]?.data?.totalTransaction || 0;
 
-      // Pastikan setiap response berisi data yang sesuai
-      const totalUsers = responses[0]?.data?.userCount || 0;
-      const totalEvents = responses[1]?.data?.totalEvents || 0;
-      const totalPaids = responses[2]?.data?.data || 0;
-      const totalPaidValues = responses[3]?.data?._sum.payment_ammount || 0;
-      // const totalRegistration = responses[4]?.data?.totalRegistration || 0;
-      // const totalTransaction = responses[5]?.data?.totalTransaction || 0;
-
-      console.log("ini adalah response :", responses);
-
-      // Mengupdate state dengan data yang diperoleh
-      setDashboard({
-        totalUsers,
-        totalEvents,
-        totalPaids,
-        totalPaidValues,
-        // totalRegistration,
-        // totalTransaction,
+        // Mengupdate state dengan data yang diperoleh
+        setDashboard({
+          totalUsers,
+          totalEvents,
+          totalPaids,
+          totalPaidValues,
+          // totalRegistration,
+          // totalTransaction,
+        });
       });
     } catch (error) {
       // Menambahkan log lebih rinci untuk debugging
@@ -108,7 +105,6 @@ function AdminDashboard() {
       if (user?.user_role === "admin") {
         handleFethindData();
       } else {
-        console.log("execute if user are not admin");
         handleUnAuthorized();
       }
     }

@@ -46,6 +46,7 @@ export class AdminDashboardService {
     WHERE 
     created_at >= NOW() - INTERVAL '6 month'
     AND created_at < NOW()
+    AND user_role = 'user'
     GROUP BY 
     EXTRACT(MONTH FROM created_at)
     ORDER BY 
@@ -81,7 +82,7 @@ export class AdminDashboardService {
     WHERE
         order_date >= NOW() - INTERVAL '6 month'
         AND order_date < NOW()
-         AND status_order = 'Paid'
+        AND (status_order = 'Paid' OR status_order = 'Completed')
     GROUP BY
          EXTRACT(MONTH FROM order_date)
     ORDER BY

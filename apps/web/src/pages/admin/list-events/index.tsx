@@ -136,7 +136,11 @@ function Listevent() {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`/api/admin/events/${event_id}`)
+          .delete(`/api/admin/events/${event_id}`, {
+            headers: {
+              Authorization: `Bearer ${adminToken}`,
+            },
+          })
           .then(() => {
             Swal.fire("Event berhasil dihapus!", "", "success");
             getAllEvents(); // Refresh daftar event setelah penghapusan
