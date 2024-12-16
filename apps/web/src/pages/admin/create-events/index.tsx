@@ -36,32 +36,32 @@ function CreateEventForm() {
   });
   console.log("ini adalah form data:", formData);
 
-  const [errors, setErrors] = useState({
-    is_paid: "",
-    event_price: "",
-    discount_percentage: "",
-  });
-
-  const handleRadioChange = (value: boolean) => {
-    setFormData({
-      ...formData,
-      is_paid: value,
-    });
-  };
-
+  // Fungsi untuk menangani perubahan nilai input
   const handleChange = (e: { target: { name: any; value: any } }) => {
+    // Destrukturisasi properti 'name' dan 'value' dari event target
     const { name, value } = e.target;
+
+    // Memperbarui state formData dengan nilai baru
     setFormData((prevData) => ({
+      // Menyalin data sebelumnya menggunakan spread operator
       ...prevData,
+
+      // Memperbarui nilai properti yang sesuai dengan 'name' pada form
+      // Key [name] adalah properti yang berubah, dan 'value' adalah nilai baru
       [name]: value,
     }));
   };
 
+  // Fungsi asynchronous untuk mengambil data kategori dari API
   async function handleFetchCategory() {
     try {
+      // Mengambil data kategori dari API menggunakan eventHandlerApi
       const response = await eventHandlerApi.getAllCategories();
+
+      // Jika request berhasil, set data kategori ke dalam state 'categoryList'
       setCategoryList(response.data);
     } catch (error) {
+      // Menangkap dan mengembalikan error jika ada kegagalan dalam request
       return error;
     }
   }
@@ -260,55 +260,66 @@ function CreateEventForm() {
     }
 
     console.log("testiiii", formData);
+    // Membuat instance FormData untuk mengirim data dalam format multipart/form-data
     const data = new FormData();
-    data.append("event_name", formData.event_name);
-    data.append("event_description", formData.event_description);
-    data.append("event_price", formData.event_price.toString());
+
+    // Menambahkan data ke objek FormData, masing-masing field dari formData akan dikirimkan
+    data.append("event_name", formData.event_name); // Menambahkan nama event
+    data.append("event_description", formData.event_description); // Menambahkan deskripsi event
+    data.append("event_price", formData.event_price.toString()); // Menambahkan harga event, dikonversi ke string
     data.append(
       "event_location",
       formData.is_online ? "Online" : formData.event_location
-    );
-    data.append("event_capacity", formData.event_capacity.toString());
-    data.append("categoryId", formData.categoryId.toString());
-    data.append("event_start_date", formData.event_start_date);
-    data.append("event_end_date", formData.event_end_date);
-    data.append("is_online", formData.is_online.toString());
-    data.append("is_paid", formData.is_paid.toString());
-    data.append("discount_percentage", formData.discount_percentage.toString());
-    data.append("is_active", formData.is_active.toString());
-    data.append("event_image", formData.event_image);
+    ); // Menambahkan lokasi event (jika event online, set "Online", jika tidak set sesuai lokasi yang diinput)
+    data.append("event_capacity", formData.event_capacity.toString()); // Menambahkan kapasitas event, dikonversi ke string
+    data.append("categoryId", formData.categoryId.toString()); // Menambahkan ID kategori event, dikonversi ke string
+    data.append("event_start_date", formData.event_start_date); // Menambahkan tanggal mulai event
+    data.append("event_end_date", formData.event_end_date); // Menambahkan tanggal berakhir event
+    data.append("is_online", formData.is_online.toString()); // Menambahkan status apakah event online atau tidak, dikonversi ke string
+    data.append("is_paid", formData.is_paid.toString()); // Menambahkan status apakah event berbayar atau tidak, dikonversi ke string
+    data.append("discount_percentage", formData.discount_percentage.toString()); // Menambahkan persentase diskon, dikonversi ke string
+    data.append("is_active", formData.is_active.toString()); // Menambahkan status apakah event aktif atau tidak, dikonversi ke string
+    data.append("event_image", formData.event_image); // Menambahkan gambar event
 
+    // Blok try-catch untuk menangani proses asinkron dan menangani error
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Menyatakan bahwa proses sedang berlangsung (loading)
+
+      // Mengirim data form yang sudah diproses ke API untuk membuat event baru
       await eventHandlerApi
-        .createEvent(data, adminToken as string)
+        .createEvent(data, adminToken as string) // Menggunakan metode 'createEvent' untuk mengirim data dan token admin
         .then((response) => {
           if (response) {
-            setIsLoading(false);
-            console.log(response);
-            alert("Event berhasil dibuat!");
-            router.push("/admin/list-events");
+            setIsLoading(false); // Menghentikan status loading
+            console.log(response); // Menampilkan respons dari server di konsol
+            alert("Event berhasil dibuat!"); // Menampilkan alert jika event berhasil dibuat
+            router.push("/admin/list-events"); // Mengarahkan pengguna ke halaman daftar event
           }
         });
     } catch (error) {
-      setIsLoading(false);
-      alert("Terjadi kesalahan: ");
+      setIsLoading(false); // Menghentikan status loading jika terjadi error
+      alert("Terjadi kesalahan: "); // Menampilkan alert jika terjadi kesalahan
     }
   };
 
+  // Fungsi untuk menangani kasus saat pengguna tidak memiliki otorisasi (misalnya belum login sebagai admin)
   function handleUnAuthorized() {
+    // Menampilkan SweetAlert dengan pesan error jika pengguna belum login sebagai admin
     Swal.fire({
-      title: "You need to login as admin!",
-      icon: "error",
-      confirmButtonText: "Back to login",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
+      title: "You need to login as admin!", // Judul pesan alert
+      icon: "error", // Menampilkan ikon error
+      confirmButtonText: "Back to login", // Teks pada tombol konfirmasi
+      allowOutsideClick: false, // Tidak memungkinkan menutup alert dengan klik di luar alert
+      allowEscapeKey: false, // Tidak memungkinkan menutup alert dengan tombol Escape
     }).then((result) => {
+      // Jika pengguna menekan tombol konfirmasi
       if (result.isConfirmed) {
+        // Arahkan pengguna ke halaman login admin
         window.location.href = "/admin/auth";
       }
     });
   }
+
   useEffect(() => {
     console.log(isLoading);
     if (!isLoading) {
